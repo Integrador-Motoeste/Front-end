@@ -1,6 +1,6 @@
 import { ClerkProvider, ClerkLoaded } from '@clerk/clerk-expo'
 import { Slot } from 'expo-router'
-
+import { StatusBar } from 'expo-status-bar'
 const KEY_CLERK = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string
 
 if (!KEY_CLERK) {
@@ -12,7 +12,8 @@ if (!KEY_CLERK) {
 export default function RootLayoutNav() {
   return (
     <ClerkProvider publishableKey={KEY_CLERK}>
-        <Slot />
+      <StatusBar backgroundColor='#1FD87F'></StatusBar>
+      <Slot />
     </ClerkProvider> 
   )
 }

@@ -13,7 +13,7 @@ import  Input  from '@/components/Input';
 import Button from '@/components/Button';
 import ButtonOutLine from '@/components/ButtonOutLine';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
-
+import AppIndex from './(tabs)';
 export default function AppLogin() {
     const { isLoaded, signUp, setActive } = useSignUp()
     const router = useRouter()
@@ -59,7 +59,7 @@ export default function AppLogin() {
 
       if (completeSignUp.status === 'complete') {
         await setActive({ session: completeSignUp.createdSessionId })
-        router.replace('/(tabs)/')
+        // router.replace('/(tabs)/');
       } else {
         console.error(JSON.stringify(completeSignUp, null, 2))
       }
@@ -94,63 +94,64 @@ export default function AppLogin() {
       } else {
 
     return (
-        <Container>
-            <StatusBar style="auto" />
-            <Header>
-                <Logo>MOTOCAR</Logo>
-            </Header>
+    //     <Container>
+    //         <StatusBar style="auto" />
+    //         <Header>
+    //             <Logo>MOTOCAR</Logo>
+    //         </Header>
 
-            <HelmetMain />
+    //         <HelmetMain />
 
-            <MainLogin>
-                <Title>Bem-Vindo</Title>
-                <SignedIn>
-                    <Text>Olá, {user?.emailAddresses[0].emailAddress}</Text>
-                    <Button title="Sair" onPress={handleSignOut} />
+    //         <MainLogin>
+    //             <Title>Bem-Vindo</Title>
+    //             <SignedIn>
+    //                 <Text>Olá, {user?.emailAddresses[0].emailAddress}</Text>
+    //                 <Button title="Sair" onPress={handleSignOut} />
 
-                </SignedIn>
-                <View>
-      {!pendingVerification && (
-        <>
-          <Input
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Email"
-            onChangeText={(email: string)=> setEmailAddress(email)}
-          />
-          <Input
-            value={password}
-            placeholder="Senha"
-            secureTextEntry={true}
-            onChangeText={(password: string)=> setPassword(password)}
-          />
-          <ContainerButtons>
-          <Button title="Entrar" onPress={onSignUpPress} />
-          <ButtonOutLine title="Entrar com o Google"/>
-          </ContainerButtons>
+    //             </SignedIn>
+    //             <View>
+    //   {!pendingVerification && (
+    //     <>
+    //       <Input
+    //         autoCapitalize="none"
+    //         value={emailAddress}
+    //         placeholder="Email"
+    //         onChangeText={(email: string)=> setEmailAddress(email)}
+    //       />
+    //       <Input
+    //         value={password}
+    //         placeholder="Senha"
+    //         secureTextEntry={true}
+    //         onChangeText={(password: string)=> setPassword(password)}
+    //       />
+    //       <ContainerButtons>
+    //       <Button title="Entrar" onPress={onSignUpPress} />
+    //       <ButtonOutLine title="Entrar com o Google"/>
+    //       </ContainerButtons>
           
             
 
-        </>
-      )}
-      {pendingVerification && (
-        <>
-          <Input value={code} placeholder="Code..." onChangeText={(code: string)=> setCode(code)} />
-          <Button title="Verify Email" onPress={onPressVerify} />
-        </>
-      )}
-    </View>
-            </MainLogin>
+    //     </>
+    //   )}
+    //   {pendingVerification && (
+    //     <>
+    //       <Input value={code} placeholder="Code..." onChangeText={(code: string)=> setCode(code)} />
+    //       <Button title="Verify Email" onPress={onPressVerify} />
+    //     </>
+    //   )}
+    // </View>
+    //         </MainLogin>
 
-            <SignUp>
-                <ContainerSignUpText>
-                    <TitleSignUp>Sou novo aqui</TitleSignUp>
-                    <SubTitle>Cadastrar-me</SubTitle>
-                </ContainerSignUpText>
-                    <EvilIcons name="arrow-right" size={50} color="#1FD87F" /> 
-            </SignUp>
+    //         <SignUp>
+    //             <ContainerSignUpText>
+    //                 <TitleSignUp>Sou novo aqui</TitleSignUp>
+    //                 <SubTitle>Cadastrar-me</SubTitle>
+    //             </ContainerSignUpText>
+    //                 <EvilIcons name="arrow-right" size={50} color="#1FD87F" /> 
+    //         </SignUp>
 
-        </Container>
+    //     </Container>
+    <AppIndex></AppIndex>
     )
 }
 }
