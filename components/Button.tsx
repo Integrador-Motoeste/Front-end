@@ -17,7 +17,7 @@ export default function Button({ onPress , title,...rest}: CustomButtonProps) {
 const Text = Styled.Text`
     color: white;
     font-size: 16px;
-    font-family: "InterTight_600SemiBold";
+    font-family: "Inter_600SemiBold";
     `;
 
 const ButtonDefault = Styled.TouchableOpacity`
