@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -16,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "ios-identifier"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +27,8 @@
         "googleMaps": {
           "apiKey": "AIzaSyA3sAoj1Rrrc7XDAVF-4-jS0PACBLZSUdo"
         }
-      }
+      },
+      "package": "com.anonymous.MOTO_FRONT"
     },
     "web": {
       "bundler": "metro",
@@ -37,14 +38,25 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      ["expo-font",
+      [
+        "expo-font",
         {
-          "fonts": ["./assets/fonts/InterTight-VariableFont_wght.ttf", "./assets/fonts/Inter-Bold.otf", "./assets/fonts/Inter-ExtraBold.otf", "./assets/fonts/Inter-Light.otf", "./assets/fonts/Inter-Medium.otf", "./assets/fonts/Inter-Regular.otf", "./assets/fonts/Inter-SemiBold.otf", "./assets/fonts/Inter-Thin.otf"]
+          "fonts": [
+          ]
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e68671ff-ed97-428d-8a42-fa553af53507"
+      }
+    },
+    "scheme": "mycode"
   }
 }

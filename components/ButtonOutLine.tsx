@@ -5,9 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 interface CustomButtonProps extends TouchableOpacityProps {
     title: string;
     onPress?: () => void;
-    isLoading?: boolean
+    isLoading?: boolean;
     icon?: keyof typeof Ionicons.glyphMap
-    }
+}
 
 export default function ButtonOutLine({isLoading, onPress , title, icon, ...rest}: CustomButtonProps) {
   return (

@@ -1,24 +1,24 @@
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, View } from '@/components/Themed';
+// import { StyleSheet, TouchableOpacity } from 'react-native';
+// import { Text, View } from '@/components/Themed';
 
 
-export default function TabOneScreen() {
+// export default function TabOneScreen() {
   
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Olá Mundo!</Text>
-    </View>
-  );
-}
+//   return (
+//     <View style={styles.container}>
+//       <Text style={styles.title}>Olá Mundo!</Text>
+//     </View>
+//   );
+// }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+//   title: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//   },
+// });
