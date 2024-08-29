@@ -4,7 +4,26 @@ const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 import { style } from "./styles";
 import Marker from "@/assets/SVG/marker";
 import OriginMarker from "@/assets/SVG/origin-marker";
+import * as SplashScreen from 'expo-splash-screen';
+import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
+import {useEffect} from 'react';
+SplashScreen.preventAutoHideAsync();
+
+
 export default function DestinationInput({ setDestination, placeholder, setIsTyping, isOrigin }) {
+    const [loaded, error] = useFonts({
+        Inter_500Medium,
+    });
+
+    useEffect(() => {
+        if (loaded || error) {
+          SplashScreen.hideAsync();
+        }
+    }, [loaded, error]);
+    
+    if (!loaded && !error) {
+        return null;
+    }
 
     return (
         <View style={style.container}>
@@ -27,6 +46,7 @@ export default function DestinationInput({ setDestination, placeholder, setIsTyp
                     textInput: {
                         fontSize: 18,
                         paddingBottom: 0,
+                        fontFamily: "Inter_500Medium",
                     },
                 }}
                 query={{

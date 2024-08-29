@@ -49,10 +49,8 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
       </Stack>
-    </ThemeProvider>
   );
 }
