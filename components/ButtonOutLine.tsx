@@ -1,15 +1,26 @@
 import  Styled  from "styled-components/native";
-import { TouchableOpacityProps } from "react-native";
+import { TouchableOpacityProps, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface CustomButtonProps extends TouchableOpacityProps {
     title: string;
     onPress?: () => void;
+    isLoading?: boolean
+    icon?: keyof typeof Ionicons.glyphMap
     }
 
-export default function ButtonOutLine({ onPress , title,...rest}: CustomButtonProps) {
+export default function ButtonOutLine({isLoading, onPress , title, icon, ...rest}: CustomButtonProps) {
   return (
-    <ButtonDefault onPress={onPress} {...rest} >
-        <Text>{title}</Text>
+    <ButtonDefault disabled={isLoading} activeOpacity={0.7} onPress={onPress} {...rest} >
+      { isLoading ? (
+        <ActivityIndicator color="#1FD87F" />
+      ) : (
+      <>
+        <Ionicons name={icon} size={20} color="#1FD87F" />
+          <Text>{title}</Text>
+      </>
+      )
+    }
     </ButtonDefault>
   );
 }
@@ -17,7 +28,8 @@ export default function ButtonOutLine({ onPress , title,...rest}: CustomButtonPr
 const Text = Styled.Text`
     color: #1FD87F;
     font-size: 16px;
-    font-family: "InterTight_600SemiBold";
+    font-family: "Inter_600SemiBold";
+    margin-left: 5px;
     `;
 
 const ButtonDefault = Styled.TouchableOpacity`
@@ -32,4 +44,5 @@ const ButtonDefault = Styled.TouchableOpacity`
     justify-content: center;
     display: flex;
     elevation: 10;
+    flex-direction: row;
     `;
