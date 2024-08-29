@@ -1,5 +1,5 @@
 import HelmetMain from '@/assets/SVG/helmet-main';
-import { Container, Header, Logo, MainLogin, Title, ContainerButtons } from './(public)/style';
+import { Container, Header, Logo, MainLogin, Title, ContainerButtons, SignUpContent, ContainerSignUpText, SubTitle, TitleSignUp} from './style';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
 import { useFonts, InterTight_300Light, Inter_400Regular, Inter_900Black, InterTight_500Medium, InterTight_400Regular, Inter_600SemiBold } from '@expo-google-fonts/dev';
@@ -7,9 +7,10 @@ import { View } from 'react-native';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import ButtonOutLine from '@/components/ButtonOutLine';
-import SignUpButton from '@/components/ButtonSignUp';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 import * as WebBrowser from 'expo-web-browser';
 import * as google from 'expo-auth-session/providers/google';
+import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -27,16 +28,15 @@ export default function AppLogin() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const androidClientId = process.env.GOOGLE_ANDROID_CLIENT_ID || '507414026561-gfca7tkm5vlpra3qsughq3vkjq2p0j6f.apps.googleusercontent.com';
-  const webClientId = '507414026561-0m88ul26kaqjq9b299t1vhbsfqso2n33.apps.googleusercontent.com'
-
+  const androidClientId = process.env.GOOGLE_ANDROID_CLIENT_ID || '73964452277-iio80k209bamfprkdkd91c4ibuu67l91.apps.googleusercontent.com'
+  const webClientId = '73964452277-jv69sv8mqopj74vlvfinm4s2hhhil20u.apps.googleusercontent.com'
+  
   const config = {
     androidClientId,
     webClientId,
-    redirectUri: `https://auth.expo.io/@DavyDantas/MOTO_FRONT`,
-
+    redirectUri: `https://auth.expo.io/@davydantas/MOTO_FRONT`,
   };
-
+  
   const [request, response, promptAsync] = google.useAuthRequest(config);
 
   const handleToken =() => {
@@ -59,6 +59,10 @@ export default function AppLogin() {
 
   if (!fontsLoaded) {
     return null; 
+  }
+
+  function handleSignUp(){
+    router.navigate('/SignUp');
   }
 
   return (
@@ -101,7 +105,14 @@ export default function AppLogin() {
         </View>
       </MainLogin>
 
-      <SignUpButton />
+      <SignUpContent onPress={() => handleSignUp()}>
+            <ContainerSignUpText>
+                <TitleSignUp>Sou novo aqui</TitleSignUp>
+                <SubTitle>Cadastrar-me</SubTitle>
+            </ContainerSignUpText>
+                <EvilIcons name="arrow-right" size={50} color="#1FD87F" /> 
+        </SignUpContent>
+
     </Container>
   );
 }

@@ -1,4 +1,4 @@
-package com.anonymous.MOTO_FRONT
+package com.davydantas.MOTO_FRONT
 
 import android.os.Build
 import android.os.Bundle

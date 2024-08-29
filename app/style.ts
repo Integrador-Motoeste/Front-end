@@ -60,3 +60,40 @@ export const Container = styled(SafeAreaView)`
     width: 100%;
     flex: 1;
 `;
+
+
+export const SignUpContent = styled.TouchableOpacity`
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    bottom: 7%;
+    right: 20px;
+    align-self: flex-end;
+    justify-self: flex-end;
+    position: absolute;
+`;
+
+export const ContainerSignUpText = styled.View`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    height: auto;
+    
+`;
+
+export const TitleSignUp = styled.Text`
+    color: #1FD87F;
+    font-size: 30px;
+    font-weight: 400;
+    font-family: "InterTight_300Light";
+    margin-bottom: 0px;
+`;
+
+export const SubTitle = styled.Text`
+    color: #0EC16B; 
+    font-size: 20px;
+    font-weight: 400;
+    font-family: "Inter_600SemiBold";
+`;  

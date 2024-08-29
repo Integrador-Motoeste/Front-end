@@ -1,4 +1,4 @@
-package com.anonymous.MOTO_FRONT
+package com.davydantas.MOTO_FRONT
 
 import android.app.Application
 import android.content.res.Configuration

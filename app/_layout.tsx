@@ -1,10 +1,4 @@
-import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/clerk-expo'
-import { router, Slot } from 'expo-router'
-import { useEffect } from 'react'
-import { ActivityIndicator } from 'react-native'
-
-const KEY_CLERK = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string
-
+import { Slot } from 'expo-router'
 
 
 export default function Layout() {
