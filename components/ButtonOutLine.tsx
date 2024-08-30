@@ -29,6 +29,7 @@ const Text = Styled.Text`
     color: #1FD87F;
     font-size: 16px;
     font-family: "Inter_600SemiBold";
+    margin: 0;
     margin-left: 5px;
     `;
 
@@ -45,4 +46,5 @@ const ButtonDefault = Styled.TouchableOpacity`
     display: flex;
     elevation: 10;
     flex-direction: row;
+    
     `;

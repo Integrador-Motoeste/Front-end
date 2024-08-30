@@ -9,7 +9,7 @@ interface InputProps extends TextInputProps {
 
 export default function Input({ placeholder, value, outline, ...rest }: InputProps) {
   return (
-    <TextInput outline={outline} placeholder={placeholder} value={value} {...rest} />
+    <TextInput placeholderTextColor={'#b8b8b8'} outline={outline} placeholder={placeholder} value={value} {...rest} />
   );
 }
 
@@ -19,12 +19,9 @@ const TextInput = styled.TextInput<InputProps>`
   margin: 10px;
   width: 297px;
   height: 47px;
-  border: ${({ outline }) => (outline ? "1px solid #1FD87F" : "none")};
+  border: ${({ outline }) => (outline ? "2px solid #1FD87F" : "none")};
   background-color: white;
   font-size: 16px;
   font-family: "InterTight_500Medium";
   color: '#1FD87F';
-  ::placeholder {
-    color: #DADADA;
-  }
 `;

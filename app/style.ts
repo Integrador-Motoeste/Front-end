@@ -16,7 +16,7 @@ export const Title = styled.Text`
     color: #ffffff;
     font-size: 30px;
     font-weight: 400;
-    font-family: "Inter_400Regular";
+    font-family: "InterTight_500Medium";
     margin-bottom: 25px;
 `;
 

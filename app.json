@@ -39,12 +39,9 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "e68671ff-ed97-428d-8a42-fa553af53507"
       }
     },
-    "scheme": "myapp",
+    "scheme": "MOTO_FRONT",
     "android": {
       "package": "com.davydantas.MOTO_FRONT"
     }
