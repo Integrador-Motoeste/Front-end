@@ -98,3 +98,25 @@ export const SubTitle = styled.Text`
     font-weight: 400;
     font-family: "Inter_600SemiBold";
 `;  
+
+export const PasswordInput = styled.View`
+    flex-direction: row;
+    align-items: center;
+    border-radius: 10px;
+    margin: 10px;
+    width: 297px;
+    height: 47px;
+    background-color: #fff;
+    font-size: 16px;
+    font-family: "InterTight_500Medium";
+`;
+
+export const IconContainer = styled.View`
+  background-color: #ECECEC;
+  padding: 3.5px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;
