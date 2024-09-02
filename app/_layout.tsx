@@ -15,7 +15,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(passenger)',
+  initialRouteName: '(pilot)',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -49,7 +49,8 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-      <Stack>
+      <Stack initialRouteName='(pilot)'>
+        <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
         <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
       </Stack>
   );

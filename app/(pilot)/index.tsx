@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View } from '@/components/Themed';
-import Map from '@/components/map/passenger/map';
+import Map from '@/components/map/pilot/map';
 
 export default function TabOneScreen() {
   
