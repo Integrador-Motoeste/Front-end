@@ -3,12 +3,9 @@ import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObj
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
 import { style } from "./styles";
-import DestinationInput from "./autocompletes/places";
 import MapViewDirections from "react-native-maps-directions";
-import Badge from "../badge/badge";
-import RNPickerSelect from 'react-native-picker-select';
-import Button from "../Button";
 import { useRef } from "react";
+import { Notification } from "@/components/notification";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -109,99 +106,60 @@ export default function Map() {
     return (
         <View style={style.container}>
 
-        
-        { origin && 
-        <View style={style.mapContainer}>
-            <MapView
-            ref={mapRef} 
-            style={style.map}
-            initialRegion={{
-                latitude: origin.latitude,
-                longitude: origin.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            }}
-            >
-                <Marker
-                coordinate={{
+            <Notification></Notification>
+            
+            { origin && 
+            <View style={style.mapContainer}>
+                <MapView
+                ref={mapRef} 
+                style={style.map}
+                initialRegion={{
                     latitude: origin.latitude,
-                    longitude: origin.longitude
+                    longitude: origin.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
                 }}
-                identifier="origin"
-                title="Origem"
                 >
-                </Marker>
-                { destination &&
                     <Marker
                     coordinate={{
-                        latitude: destination.lat,
-                        longitude: destination.lng,
-                    }}
-                    identifier="destination"
-                    title="Destino"
-                    >
-                    </Marker>
-                }
-
-                {origin && destination && (
-                    <MapViewDirections
-                    origin={{
                         latitude: origin.latitude,
                         longitude: origin.longitude
                     }}
-                    destination={{
-                        latitude: destination.lat,
-                        longitude: destination.lng,
-                    }}
-                    apikey={google_key}
-                    strokeWidth={5}    
-                    strokeColor="blue"
-                    />
-                    )}
-            </MapView>
-        </View>
-        }
+                    identifier="origin"
+                    title="Origem"
+                    >
+                    </Marker>
+                    { destination &&
+                        <Marker
+                        coordinate={{
+                            latitude: destination.lat,
+                            longitude: destination.lng,
+                        }}
+                        identifier="destination"
+                        title="Destino"
+                        >
+                        </Marker>
+                    }
 
-        <View style={[
-            origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
-        ]}>
-                { origin && destination && !isTypingOrigin &&
-                    <DestinationInput isOrigin={true} setIsTyping={setIsTypingDestination} placeholder="Localização Atual" setDestination={handleOriginPlaceChange}/>
-                }
-                { !isTypingDestination &&
-                    <DestinationInput isOrigin={false} setIsTyping={setIsTypingOrigin} placeholder="Para onde vamos?" setDestination={setDestination}/>
-                }
-                { origin && destination && !isTypingOrigin && !isTypingDestination &&
-                    <View style={style.confirmPopup}>
-                        <View style={{
-                            flexDirection: "row",
-                            width: "80%",
-                            justifyContent: "space-around",
-                        }}>
-                            <Badge value={distance}></Badge>
-                            <Badge value={duration}></Badge>
-                            <Badge color={"#34C17D"} value={`R$ ${price}`}></Badge>
-                        </View>
-                        <View style={{
-                            borderWidth: 1,
-                            borderColor: "#34C17D",
-                            borderRadius: 20,
-                            width: "80%",
-                        }}>
-                            <RNPickerSelect
-                                onValueChange={(value) => console.log(value)}
-                                items={[
-                                    { label: 'Pix', value: 'pix' },
-                                    { label: 'Cartão de Crédito', value: 'credit-card' },
-                                ]}
-                                placeholder={{label:"Pagamento", value: null}}
-                            />
-                        </View>
-                        <Button style={{width: "80%"}} title="Confirmar"/>
-                    </View>
-                }
-        </View>
+                    {origin && destination && (
+                        <MapViewDirections
+                        origin={{
+                            latitude: origin.latitude,
+                            longitude: origin.longitude
+                        }}
+                        destination={{
+                            latitude: destination.lat,
+                            longitude: destination.lng,
+                        }}
+                        apikey={google_key}
+                        strokeWidth={5}    
+                        strokeColor="blue"
+                        />
+                        )}
+                </MapView>
+            </View>
+            }
 
-    </View>
-  );
+        </View>
+    );
 }
