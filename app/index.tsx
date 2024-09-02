@@ -1,14 +1,15 @@
 import HelmetMain from '@/assets/SVG/helmet-main';
-import { Container, Header, Logo, MainLogin, Title, ContainerButtons, SignUpContent, ContainerSignUpText, SubTitle, TitleSignUp} from './style';
-import { StatusBar } from 'expo-status-bar';
-import { useState, useEffect } from 'react';
-import { KeyboardAvoidingView } from 'react-native';
-import Input from '@/components/Input';
 import Button from '@/components/Button';
 import ButtonOutLine from '@/components/ButtonOutLine';
+import Input from '@/components/Input';
+import { MaterialIcons } from '@expo/vector-icons';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
-import * as WebBrowser from 'expo-web-browser';
 import { Link, router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
+import { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
+import { Container, ContainerButtons, ContainerSignUpText, Header, Logo, MainLogin, PasswordInput, SignUpContent, SubTitle, Title, TitleSignUp, IconContainer} from './style';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -17,9 +18,10 @@ export default function AppLogin() {
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function handleLogin() {
-    router.push('/public');
+    router.push('/(public)');
   }
 
   return (
@@ -36,15 +38,29 @@ export default function AppLogin() {
 
           <Input
               value={emailAddress}
+              style={{paddingLeft: 16}}
               placeholder="Email"
               onChangeText={(email: string) => setEmailAddress(email)}
           />
-          <Input
-            value={password}
-            placeholder="Senha"
-            secureTextEntry={true}
-            onChangeText={(password: string) => setPassword(password)}
-          />
+          <PasswordInput>
+            <Input
+              value={password}
+              placeholder="Senha"
+              style={{ width: 250 }}
+              secureTextEntry={!isPasswordVisible}
+              onChangeText={(password: string) => setPassword(password)}
+            />
+            <IconContainer>
+              <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                <MaterialIcons
+                  name={isPasswordVisible ? 'visibility' : 'visibility-off'}
+                  size={20}
+                  color={'#767676'}
+                />
+              </TouchableOpacity>
+            </IconContainer>
+          </PasswordInput>
+
           <ContainerButtons>
             <Button title="Entrar" onPress={() => handleLogin()}/>
 
