@@ -26,7 +26,6 @@ export const Container = Styled.View`
     align-items: center;
     justify-content: center;
     flex: 1;
-    gap: 20px;
 `;
 
 
@@ -97,6 +96,7 @@ export const InstructionText = Styled.Text`
     color: #7D7D7D;
     font-family: 'Inter_600SemiBold';
     width: 80%;
+    margin-bottom: 2%;
 `;
 
 export const ValueLabel = Styled.Text`
