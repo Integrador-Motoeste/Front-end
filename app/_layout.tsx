@@ -49,7 +49,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-      <Stack initialRouteName='(pilot)'>
+      <Stack initialRouteName='(passenger)'>
         <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
         <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
       </Stack>
