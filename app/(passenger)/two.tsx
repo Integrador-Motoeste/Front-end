@@ -14,18 +14,12 @@ export default function TabTwoScreen() {
     const connectSocket = () => {
         const socket = io('http://192.168.0.9:8001', {
             extraHeaders: {
-                'User-Type': "driver",
+                'User-Type': "pilot",
                 'User-Id': "10",
             }
         })
 
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        })
-
-
         socket.on('ride_request', (data: any) => {
-            console.log('Ride request received', data);
             setPassengerId(data.passenger_id);
             setHasRide(true);
         });
@@ -34,7 +28,6 @@ export default function TabTwoScreen() {
 
     const acceptRide = () => {
         if (socket) {
-            console.log('Accepting ride');
             socket.emit('respond_ride', { pilot_id: 1, passenger_id: passengerId, response: true });
             setHasRide(false);
         }

@@ -10,7 +10,8 @@ import RNPickerSelect from 'react-native-picker-select';
 import Button from "../../Button";
 import { useRef } from "react";
 import { io } from "socket.io-client";
-
+import { SearchingPop } from "@/components/searchingPopup";
+import { to_br_real } from "@/components/utils/to-real";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -24,8 +25,9 @@ export default function Map() {
 
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number>(0);
+    const [price, setPrice] = useState<number | string>(0);
 
+    const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
 
     const connectSocket = () => {
@@ -36,9 +38,6 @@ export default function Map() {
             }
         })
 
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        })
     
         socket.on('ride_response', (data: any) => {
             if (data.response === 'accepted') {
@@ -52,10 +51,18 @@ export default function Map() {
 
     const requestRide = () => {
         if (socket) {
-            console.log('Requesting ride');
             socket.emit('request_ride', { passenger_id: '1' });
+            setIsConfirmed(true);
         } else {
             Alert.alert('Erro', 'Conexão não estabelecida. Por favor, conecte primeiro.');
+        }
+    }
+
+    const cancelRide = () => {
+        if (socket) {
+            socket.disconnect();
+            setIsConfirmed(false);
+            connectSocket()
         }
     }
 
@@ -112,7 +119,7 @@ export default function Map() {
                         setDuration(duration);
 
                         const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
+                        setPrice(to_br_real(price));
                     } else {
                         console.error("Error fetching distance data");
                     }
@@ -197,46 +204,53 @@ export default function Map() {
             </MapView>
         </View>
         }
+    
+        { isConfirmed ?
+            <SearchingPop visible={isConfirmed} onCancel={() => cancelRide()} message="Procurando pilotos disponíveis..."/>
+        :
+            (
+            <View style={[
+                origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
+            ]}>
+                    { origin && destination && !isTypingOrigin &&
+                        <DestinationInput isOrigin={true} setIsTyping={setIsTypingDestination} placeholder="Localização Atual" setDestination={handleOriginPlaceChange}/>
+                    }
+                    { !isTypingDestination &&
+                        <DestinationInput isOrigin={false} setIsTyping={setIsTypingOrigin} placeholder="Para onde vamos?" setDestination={setDestination}/>
+                    }
+                    { origin && destination && !isTypingOrigin && !isTypingDestination &&
+                        <View style={style.confirmPopup}>
+                            <View style={{
+                                flexDirection: "row",
+                                width: "80%",
+                                justifyContent: "space-around",
+                            }}>
+                                <Badge value={distance}></Badge>
+                                <Badge value={duration}></Badge>
+                                <Badge color={"#34C17D"} value={price}></Badge>
+                            </View>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: "#34C17D",
+                                borderRadius: 20,
+                                width: "80%",
+                            }}>
+                                <RNPickerSelect
+                                    onValueChange={(value) => console.log(value)}
+                                    items={[
+                                        { label: 'Pix', value: 'pix' },
+                                        { label: 'Cartão de Crédito', value: 'credit-card' },
+                                    ]}
+                                    placeholder={{label:"Pagamento", value: null}}
+                                />
+                            </View>
+                            <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
+                        </View>
+                    }
+            </View>
+            )
+        }
 
-        <View style={[
-            origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
-        ]}>
-                { origin && destination && !isTypingOrigin &&
-                    <DestinationInput isOrigin={true} setIsTyping={setIsTypingDestination} placeholder="Localização Atual" setDestination={handleOriginPlaceChange}/>
-                }
-                { !isTypingDestination &&
-                    <DestinationInput isOrigin={false} setIsTyping={setIsTypingOrigin} placeholder="Para onde vamos?" setDestination={setDestination}/>
-                }
-                { origin && destination && !isTypingOrigin && !isTypingDestination &&
-                    <View style={style.confirmPopup}>
-                        <View style={{
-                            flexDirection: "row",
-                            width: "80%",
-                            justifyContent: "space-around",
-                        }}>
-                            <Badge value={distance}></Badge>
-                            <Badge value={duration}></Badge>
-                            <Badge color={"#34C17D"} value={`R$ ${price}`}></Badge>
-                        </View>
-                        <View style={{
-                            borderWidth: 1,
-                            borderColor: "#34C17D",
-                            borderRadius: 20,
-                            width: "80%",
-                        }}>
-                            <RNPickerSelect
-                                onValueChange={(value) => console.log(value)}
-                                items={[
-                                    { label: 'Pix', value: 'pix' },
-                                    { label: 'Cartão de Crédito', value: 'credit-card' },
-                                ]}
-                                placeholder={{label:"Pagamento", value: null}}
-                            />
-                        </View>
-                        <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
-                    </View>
-                }
-        </View>
 
     </View>
   );
