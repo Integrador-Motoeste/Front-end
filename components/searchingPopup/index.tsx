@@ -10,7 +10,7 @@ interface SearchingPilotsPopupProps {
   message: string;
 }
 
-export const SearchingPilotsPopup: React.FC<SearchingPilotsPopupProps> = ({ message, visible, onCancel }) => {
+export const SearchingPop: React.FC<SearchingPilotsPopupProps> = ({ message, visible, onCancel }) => {
   return (
     <Modal
       animationType="slide"

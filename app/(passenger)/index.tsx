@@ -3,7 +3,6 @@ import { StyleSheet, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View } from '@/components/Themed';
 import Map from '@/components/map/passenger/map';
-import { SearchingPilotsPopup } from '@/components/searchingpilots';
 
 export default function TabOneScreen() {
   const [isSearching, setIsSearching] = useState(false); //Alterar para true para mostrar o pop-up
@@ -16,9 +15,6 @@ export default function TabOneScreen() {
     <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto"/>
       <Map></Map>
-      {isSearching && (
-        <SearchingPilotsPopup visible={isSearching} onCancel={handleCancel} message='Procurando Pilotos'/>
-      )}
     </SafeAreaView>
   );
 }
