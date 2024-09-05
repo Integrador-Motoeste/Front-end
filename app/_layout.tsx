@@ -5,7 +5,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useColorScheme } from '@/components/useColorScheme';
 
 export {
@@ -45,11 +45,28 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
+  const [loaded, error] = useFonts({
+    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold
+  });
+
+  useEffect(() => {
+      if (loaded || error) {
+        SplashScreen.hideAsync();
+      }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+      return null;
+  }
+
+
   return (
-      <Stack initialRouteName='(pilot)'>
+      <Stack initialRouteName='(passenger)'>
         <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
         <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
       </Stack>
