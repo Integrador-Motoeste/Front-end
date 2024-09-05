@@ -1,6 +1,12 @@
-import React from 'react';
 import styled from 'styled-components/native';
-import { View, Text } from 'react-native';
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from '@/components/header';
+import StarIcon from '@/assets/SVG/star-icon';
+import UserIcon from '@/assets/SVG/user-icon';
+import SmallTextContent from '@/components/smallTextContent';
+import BigTextContent from '@/components/bigTextContent';
+import InfoMotorcycle from '@/components/infoMotorcycle';
 
 export default function Profile() {
   return (
@@ -8,90 +14,104 @@ export default function Profile() {
       <Header>
         <Title>Meu Perfil</Title>
         <ProfileSection>
-          <ProfileImage source={{ uri: 'https://via.placeholder.com/150' }} />
+          <ProfileImageContainer>
+            <UserIcon/>
+            {/* <ProfileImage/> */}
+          </ProfileImageContainer>
           <ProfileInfo>
-            <Rating>⭐ 5.0</Rating>
-            <Name>Davy Eduardo Costa Dantas</Name>
+            <Rating><StarIcon/> 5.0</Rating>
+            <NameUser>Davy Eduardo Costa Dantassssss dasndadaçdamdpodadasldlçasdçlas,dçlkdmalskd</NameUser>
           </ProfileInfo>
         </ProfileSection>
       </Header>
 
-      <BalanceCard>
-        <BalanceText>Saldo</BalanceText>
-        <BalanceAmount>R$ 12,34</BalanceAmount>
-      </BalanceCard>
+      <ContentProfile>
+        
+          <BigTextContent label='Saldo' text='R$ 12,00'/>
 
-      <InfoGrid>
-        <InfoItem>
-          <InfoLabel>Telefone</InfoLabel>
-          <InfoText>(12) 34567-8910</InfoText>
-        </InfoItem>
-        <InfoItem>
-          <InfoLabel>CPF</InfoLabel>
-          <InfoText>123.456.789-10</InfoText>
-        </InfoItem>
-        <InfoItem>
-          <InfoLabel>Email</InfoLabel>
-          <InfoText>josesze@email.com</InfoText>
-        </InfoItem>
-        <InfoItem>
-          <InfoLabel>CNH</InfoLabel>
-          <InfoText>66602962477</InfoText>
-        </InfoItem>
-      </InfoGrid>
+        <InfoGrid>
+          <SmallTextContent label='Telefone' text='(84) 98147-9999'/>
+          <SmallTextContent label='CPF' text='123.456.789-10'/>
+          <SmallTextContent label='Email' text='josesze@email.com'/>
+          <SmallTextContent label='CNH' text='66602962477'/> 
+        </InfoGrid>
 
-      <VehicleCard>
-        <VehicleIndicator />
-        <VehicleInfo>Honda CG Titan 160 2023</VehicleInfo>
-      </VehicleCard>
+        <VehicleCard>
+          <InfoMotorcycle motorCycle={{image: '', brand: 'brand', model: 'model', year: 2021}}/>
+        </VehicleCard>
+      </ContentProfile>
+
     </Container>
   );
 }
 
-const Container = styled.ScrollView`
+const ContentProfile = styled.View`
   flex: 1;
-  background-color: #fff;
-  padding: 20px;
+  width: 100%;
+  padding: 0 5% 0 5%;
 `;
 
-const Header = styled.View`
-  background-color: #1FD87F;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: #fff;
+  align-items: center;
 `;
 
 const Title = styled.Text`
   color: white;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 26px;
+  text-align: left;
+  font-family: "Inter_500Medium";
+  width: 100%;
 `;
 
 const ProfileSection = styled.View`
   flex-direction: row;
   align-items: center;
   margin-top: 10px;
+  height: 70px;
+  width: 100%;
+  gap: 10px;
 `;
 
 const ProfileImage = styled.Image`
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 100%;
   border-radius: 30px;
   background-color: #fff;
-  margin-right: 10px;
 `;
 
-const ProfileInfo = styled.View``;
+const ProfileImageContainer = styled.View`
+  width: 70px;
+  height: 70px;
+  border-radius: 50px;
+  background-color: #ffffff;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ProfileInfo = styled.View`
+  height: 100%;
+  width: 100%;
+  align-items: left;
+  justify-content: center;
+`;
 
 const Rating = styled.Text`
   color: white;
   font-size: 16px;
+  position: absolute;
+  top: -20%;
+  right: 20%;
+  margin: 0;
+  padding: 0;
 `;
 
-const Name = styled.Text`
+const NameUser = styled.Text`
   color: white;
   font-size: 18px;
-  font-weight: bold;
+  font-family: "Inter_400Regular";
+  width: 80%;
 `;
 
 const BalanceCard = styled.View`
@@ -117,6 +137,7 @@ const InfoGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
+  gap: 10px;
 `;
 
 const InfoItem = styled.View`
@@ -141,10 +162,8 @@ const InfoText = styled.Text`
 const VehicleCard = styled.View`
   flex-direction: row;
   align-items: center;
-  background-color: #F2F2F2;
   padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  width: 100%;
 `;
 
 const VehicleIndicator = styled.View`

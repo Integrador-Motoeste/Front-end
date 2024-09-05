@@ -19,7 +19,7 @@ export default function AppLogin() {
   const [isLoading, setIsLoading] = useState(false);
 
   function handleLogin() {
-    router.push('/public');
+    router.push('/(public)');
   }
 
   return (

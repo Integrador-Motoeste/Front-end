@@ -22,6 +22,6 @@ const TextInput = styled.TextInput<InputProps>`
   border: ${({ outline }) => (outline ? "2px solid #1FD87F" : "none")};
   background-color: white;
   font-size: 16px;
-  font-family: "InterTight_500Medium";
+  font-family: "Inter_500Medium";
   color: '#1FD87F';
 `;
