@@ -9,6 +9,7 @@ import ButtonOutLine from '@/components/ButtonOutLine';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, router } from 'expo-router';
+import { useOAuth } from '@clerk/clerk-expo';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -21,6 +22,28 @@ export default function AppLogin() {
   function handleLogin() {
     router.push('/(public)');
   }
+
+  const googleOAuth = useOAuth( {strategy: 'oauth_google'})
+  async function GoogleSignIn(){
+    try {
+      setIsLoading(true)
+
+      const oAuthFlow = await googleOAuth.startOAuthFlow()
+
+      if
+
+    } catch {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect (() => {
+    WebBrowser.warmUpAsync()
+
+    return () =>{
+      WebBrowser.coolDownAsync()
+    }
+  }, [])
 
   return (
     <Container>
