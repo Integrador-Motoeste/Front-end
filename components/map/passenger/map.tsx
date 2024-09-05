@@ -30,6 +30,8 @@ export default function Map() {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
 
+    // BEGIN SOCKET
+    
     const connectSocket = () => {
         const socket = io('http://192.168.0.9:8001', {
             extraHeaders: {
@@ -66,6 +68,11 @@ export default function Map() {
         }
     }
 
+    useEffect(() => {
+        connectSocket();
+    }, [])
+
+    //// END SOCKET
 
     function handleOriginPlaceChange(data:any) {
         setOrigin({
@@ -88,7 +95,6 @@ export default function Map() {
 
     useEffect(() => {
         requestLocalPermissions();
-        connectSocket();
     }, [])
 
     useEffect(() => {

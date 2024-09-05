@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Vibration } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
@@ -6,6 +6,9 @@ import { style } from "./styles";
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
 import { Notification } from "@/components/notification";
+import { io } from "socket.io-client";
+import { SearchingPop } from "@/components/searchingPopup";
+import Button from "@/components/Button";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -13,14 +16,61 @@ const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 export default function Map() {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
-    const [isTypingOrigin, setIsTypingOrigin] = useState(false);
-    const [isTypingDestination, setIsTypingDestination] = useState(false);
     const mapRef = useRef<any>(null);
 
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
     const [price, setPrice] = useState<number>(0);
 
+
+    const [socket, setSocket] = useState<any>(null);
+    const [passengerId, setPassengerId] = useState<any>(null);
+    const [hasRide, setHasRide] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+
+    // BEGIN SOCKET
+
+    const connectSocket = () => {
+        const socket = io('http://192.168.0.9:8001', {
+            extraHeaders: {
+                'User-Type': "pilot",
+                'User-Id': "10",
+            }
+        })
+
+        socket.on('ride_request', (data: any) => {
+            Vibration.vibrate(1000)
+            setPassengerId(data.passenger_id);
+            setHasRide(true);
+        });
+        setIsSearching(true);
+        setSocket(socket);
+    }
+
+    const acceptRide = () => {
+        if (socket) {
+            socket.emit('respond_ride', { pilot_id: 1, passenger_id: passengerId, response: true });
+            setHasRide(false);
+        }
+    }
+
+    const declineRide = () => {
+        if (socket) {
+            socket.emit('respond_ride', { pilot_id: 1, passenger_id: passengerId, response: false });
+            setHasRide(false);
+        }
+    }
+
+    const cancelSearching = () => {
+        if (socket) {
+            socket.disconnect();
+            setIsSearching(false);
+        }
+    }
+
+
+
+    //// END SOCKET
 
     function handleOriginPlaceChange(data:any) {
         setOrigin({
@@ -105,61 +155,72 @@ export default function Map() {
     
     return (
         <View style={style.container}>
-
-            <Notification></Notification>
-            
-            { origin && 
-            <View style={style.mapContainer}>
-                <MapView
-                ref={mapRef} 
-                style={style.map}
-                initialRegion={{
-                    latitude: origin.latitude,
-                    longitude: origin.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                }}
-                >
-                    <Marker
-                    coordinate={{
-                        latitude: origin.latitude,
-                        longitude: origin.longitude
-                    }}
-                    identifier="origin"
-                    title="Origem"
-                    >
-                    </Marker>
-                    { destination &&
-                        <Marker
-                        coordinate={{
-                            latitude: destination.lat,
-                            longitude: destination.lng,
-                        }}
-                        identifier="destination"
-                        title="Destino"
-                        >
-                        </Marker>
-                    }
-
-                    {origin && destination && (
-                        <MapViewDirections
-                        origin={{
+            {origin && (
+                <View style={style.mapContainer}>
+                    <MapView
+                        ref={mapRef}
+                        style={style.map}
+                        initialRegion={{
                             latitude: origin.latitude,
-                            longitude: origin.longitude
+                            longitude: origin.longitude,
+                            latitudeDelta: 0.0922,
+                            longitudeDelta: 0.0421,
                         }}
-                        destination={{
-                            latitude: destination.lat,
-                            longitude: destination.lng,
-                        }}
-                        apikey={google_key}
-                        strokeWidth={5}    
-                        strokeColor="blue"
-                        />
+                    >
+                        <Marker
+                            coordinate={{
+                                latitude: origin.latitude,
+                                longitude: origin.longitude,
+                            }}
+                            identifier="origin"
+                            title="Origem"
+                        ></Marker>
+                        {destination && (
+                            <Marker
+                                coordinate={{
+                                    latitude: destination.lat,
+                                    longitude: destination.lng,
+                                }}
+                                identifier="destination"
+                                title="Destino"
+                            ></Marker>
                         )}
-                </MapView>
-            </View>
-            }
 
+                        {origin && destination && (
+                            <MapViewDirections
+                                origin={{
+                                    latitude: origin.latitude,
+                                    longitude: origin.longitude,
+                                }}
+                                destination={{
+                                    latitude: destination.lat,
+                                    longitude: destination.lng,
+                                }}
+                                apikey={google_key}
+                                strokeWidth={5}
+                                strokeColor="blue"
+                            />
+                        )}
+                    </MapView>
+                </View>
+            )}
+
+            {isSearching ? (
+                hasRide ? (
+                    <Notification
+                    accept={acceptRide}
+                    decline={declineRide}
+                    ></Notification>
+                ) : (
+                    <SearchingPop
+                        onCancel={cancelSearching}
+                        visible={isSearching}
+                        message="Procurando Corridas"
+                    ></SearchingPop>
+                )
+            ) : (
+                <Button onPress={connectSocket} title="Procurar Corrida"></Button>
+            )}
         </View>
     );
 }
