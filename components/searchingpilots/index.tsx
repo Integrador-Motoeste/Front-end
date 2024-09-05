@@ -7,9 +7,10 @@ import Button from '../Button';
 interface SearchingPilotsPopupProps {
   visible: boolean;
   onCancel: () => void;
+  message: string;
 }
 
-export const SearchingPilotsPopup: React.FC<SearchingPilotsPopupProps> = ({ visible, onCancel }) => {
+export const SearchingPilotsPopup: React.FC<SearchingPilotsPopupProps> = ({ message, visible, onCancel }) => {
   return (
     <Modal
       animationType="slide"
@@ -19,7 +20,7 @@ export const SearchingPilotsPopup: React.FC<SearchingPilotsPopupProps> = ({ visi
     >
       <View style={style.centeredView}>
         <View style={style.modalView}>
-          <Text style={style.modalText}>Procurando Pilotos</Text>
+          <Text style={style.modalText}>{message}</Text>
           <Spinner color="black" size="large" />
           <Button 
             title="Cancelar" 

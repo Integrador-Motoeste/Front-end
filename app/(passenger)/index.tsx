@@ -17,7 +17,7 @@ export default function TabOneScreen() {
       <StatusBar style="auto"/>
       <Map></Map>
       {isSearching && (
-        <SearchingPilotsPopup visible={isSearching} onCancel={handleCancel} />
+        <SearchingPilotsPopup visible={isSearching} onCancel={handleCancel} message='Procurando Pilotos'/>
       )}
     </SafeAreaView>
   );
