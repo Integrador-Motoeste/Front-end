@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
@@ -9,6 +9,8 @@ import Badge from "../../badge/badge";
 import RNPickerSelect from 'react-native-picker-select';
 import Button from "../../Button";
 import { useRef } from "react";
+import { io } from "socket.io-client";
+
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -23,6 +25,39 @@ export default function Map() {
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
     const [price, setPrice] = useState<number>(0);
+
+    const [socket, setSocket] = useState<any>(null);
+
+    const connectSocket = () => {
+        const socket = io('http://192.168.0.9:8001', {
+            extraHeaders: {
+                'User-Type': "passenger",
+                'User-Id': "1",
+            }
+        })
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        })
+    
+        socket.on('ride_response', (data: any) => {
+            if (data.response === 'accepted') {
+              Alert.alert('Corrida aceita!', `Piloto ${data.pilot_id} aceitou sua solicitação.`);
+            } else {
+              Alert.alert('Corrida recusada', 'Nenhum piloto aceitou sua solicitação.');
+            }
+        });
+        setSocket(socket);
+    }
+
+    const requestRide = () => {
+        if (socket) {
+            console.log('Requesting ride');
+            socket.emit('request_ride', { passenger_id: '1' });
+        } else {
+            Alert.alert('Erro', 'Conexão não estabelecida. Por favor, conecte primeiro.');
+        }
+    }
 
 
     function handleOriginPlaceChange(data:any) {
@@ -46,6 +81,7 @@ export default function Map() {
 
     useEffect(() => {
         requestLocalPermissions();
+        connectSocket();
     }, [])
 
     useEffect(() => {
@@ -197,7 +233,7 @@ export default function Map() {
                                 placeholder={{label:"Pagamento", value: null}}
                             />
                         </View>
-                        <Button style={{width: "80%"}} title="Confirmar"/>
+                        <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
                     </View>
                 }
         </View>
