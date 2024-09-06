@@ -30,49 +30,57 @@ export default function Map() {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
 
-    // BEGIN SOCKET
+    // BEGIN QUEUE SOCKET
+    const connectSocket = async () => {
+        return new Promise((resolve, reject) => {
+            const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/1/passenger/`);
     
-    const connectSocket = () => {
-        const socket = io('http://192.168.0.9:8001', {
-            extraHeaders: {
-                'User-Type': "passenger",
-                'User-Id': "1",
-            }
-        })
+            socket.onopen = () => {
+                console.log('Connected to the server');
+                setSocket(socket);
+                resolve(socket); 
+            };
+    
+            socket.onerror = (error) => {
+                console.log('WebSocket Error: ', error);
+                reject(error); 
+            };
 
-    
-        socket.on('ride_response', (data: any) => {
-            if (data.response === 'accepted') {
-              Alert.alert('Corrida aceita!', `Piloto ${data.pilot_id} aceitou sua solicitação.`);
-            } else {
-              Alert.alert('Corrida recusada', 'Nenhum piloto aceitou sua solicitação.');
+            socket.onmessage = (event: any) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'ride_response') {
+                    cancelRide();
+                    Alert.alert('Piloto encontrado', 'Seu piloto está a caminho!');
+                }
             }
         });
-        setSocket(socket);
-    }
-
-    const requestRide = () => {
-        if (socket) {
-            socket.emit('request_ride', { passenger_id: '1' });
+    };
+    
+    const requestRide = async () => {
+        try {
+            const socket = await connectSocket() as WebSocket;
+            const message = JSON.stringify({
+                type: "request_ride",
+                passenger_id: 1,
+            });
+            socket.send(message); 
             setIsConfirmed(true);
-        } else {
-            Alert.alert('Erro', 'Conexão não estabelecida. Por favor, conecte primeiro.');
+        } catch (error) {
+            Alert.alert('Erro', 'Não foi possível estabelecer a conexão. Tente novamente.');
         }
-    }
-
+    };
+    
     const cancelRide = () => {
         if (socket) {
-            socket.disconnect();
+            socket.close();
             setIsConfirmed(false);
-            connectSocket()
         }
-    }
+    };
+    //// END QUEUE SOCKET
 
-    useEffect(() => {
-        connectSocket();
-    }, [])
+    /// BEGIN RIDE SOCKET
 
-    //// END SOCKET
+
 
     function handleOriginPlaceChange(data:any) {
         setOrigin({

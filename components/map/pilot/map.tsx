@@ -31,39 +31,57 @@ export default function Map() {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = io('http://192.168.0.9:8001', {
-            extraHeaders: {
-                'User-Type': "pilot",
-                'User-Id': "10",
-            }
-        })
+        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/1/pilot/`)
 
-        socket.on('ride_request', (data: any) => {
-            Vibration.vibrate(1000)
-            setPassengerId(data.passenger_id);
-            setHasRide(true);
-        });
+        socket.onopen = () => {
+            console.log('Connected to the server');
+            setSocket(socket);
+        }
+
+        socket.onmessage = (event: any) => {
+            console.log(event.data);
+            const data = JSON.parse(event.data);
+            if (data.type === 'ride_request') {
+                Vibration.vibrate(1000)
+                setPassengerId(data.passenger_id);
+                setHasRide(true);
+            }
+        }
+
         setIsSearching(true);
         setSocket(socket);
     }
 
     const acceptRide = () => {
         if (socket) {
-            socket.emit('respond_ride', { pilot_id: 1, passenger_id: passengerId, response: true });
+            const message = JSON.stringify({
+                type: "respond_ride",
+                pilot_id: 1,
+                passenger_id: passengerId,
+                response: true
+            });
+            socket.send(message);
             setHasRide(false);
+            setIsSearching(false);
         }
     }
 
     const declineRide = () => {
         if (socket) {
-            socket.emit('respond_ride', { pilot_id: 1, passenger_id: passengerId, response: false });
+            const message = JSON.stringify({
+                type: "respond_ride",
+                pilot_id: 1,
+                passenger_id: passengerId,
+                response: false
+            });
+            socket.send(message);
             setHasRide(false);
         }
     }
 
     const cancelSearching = () => {
         if (socket) {
-            socket.disconnect();
+            socket.close();
             setIsSearching(false);
         }
     }
