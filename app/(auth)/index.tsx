@@ -10,8 +10,9 @@ import EvilIcons from '@expo/vector-icons/EvilIcons';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, router } from 'expo-router';
 import { useOAuth } from '@clerk/clerk-expo';
+import * as Linking from 'expo-linking';
 
-WebBrowser.maybeCompleteAuthSession();
+// WebBrowser.maybeCompleteAuthSession();
 
 export default function AppLogin() {
   
@@ -20,30 +21,41 @@ export default function AppLogin() {
   const [isLoading, setIsLoading] = useState(false);
 
   function handleLogin() {
-    router.push('/(public)');
+    router.push("/(public)");
   }
 
-  const googleOAuth = useOAuth( {strategy: 'oauth_google'})
-  async function GoogleSignIn(){
-    try {
-      setIsLoading(true)
+  // const googleOAuth = useOAuth( {strategy: 'oauth_google'})
 
-      const oAuthFlow = await googleOAuth.startOAuthFlow()
+  // async function GoogleSignIn(){
 
-      if
+  //   try {
+  //     setIsLoading(true)
+  //     const redirectUrl = Linking.createURL("/")
+  //     const oAuthFlow = await googleOAuth.startOAuthFlow({ redirectUrl })
 
-    } catch {
-      setIsLoading(false)
-    }
-  }
+  //     if (oAuthFlow.authSessionResult?.type === "success") {
+  //       const  user  = oAuthFlow.authSessionResult
+  //       console.log(user)
+  //       if (oAuthFlow.setActive) {
+  //         await oAuthFlow.setActive({ session: oAuthFlow.createdSessionId})
+  //       }
+  //     } else {
+  //       console.log('Erro ao logar com Google')
+  //       setIsLoading(false)
+  //     }
 
-  useEffect (() => {
-    WebBrowser.warmUpAsync()
+  //   } catch (error) {
+  //     setIsLoading(false)
+  //   }
+  // }
 
-    return () =>{
-      WebBrowser.coolDownAsync()
-    }
-  }, [])
+  // useEffect (() => {
+  //   WebBrowser.warmUpAsync()
+
+  //   return () =>{
+  //     WebBrowser.coolDownAsync()
+  //   }
+  // }, [])
 
   return (
     <Container>
@@ -70,11 +82,10 @@ export default function AppLogin() {
           />
           <ContainerButtons>
             <Button title="Entrar" onPress={() => handleLogin()}/>
-
             <ButtonOutLine
               isLoading={isLoading}
               onPress={() => {
-                setIsLoading(true);
+                // GoogleSignIn()
               }}
               icon="logo-google"
               title="Entrar com o Google"

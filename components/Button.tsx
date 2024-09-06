@@ -4,7 +4,7 @@ import { TouchableOpacityProps } from "react-native";
 interface CustomButtonProps extends TouchableOpacityProps {
     title: string;
     onPress?: () => void;
-    }
+}
 
 export default function Button({ onPress , title,...rest}: CustomButtonProps) {
   return (
@@ -18,7 +18,7 @@ const Text = Styled.Text`
     color: white;
     font-size: 16px;
     font-family: "Inter_600SemiBold";
-    `;
+`;
 
 const ButtonDefault = Styled.TouchableOpacity`
     padding: 12px 6px;
