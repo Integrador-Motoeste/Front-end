@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, PanResponder } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
@@ -12,7 +12,7 @@ import { useRef } from "react";
 import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import { to_br_real } from "@/components/utils/to-real";
-
+import { PassengerNotification } from "@/components/notifications/passengerConfirm";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
 
@@ -76,6 +76,28 @@ export default function Map() {
             setIsConfirmed(false);
         }
     };
+
+    const declinePilot = () => {
+        if (socket) {
+            const message = JSON.stringify({
+                type: "respond_ride",
+                passenger_id: 1,
+                response: false
+            });
+            socket.send(message);
+        }
+    }
+
+    const acceptPilot = () => {
+        if (socket) {
+            const message = JSON.stringify({
+                type: "respond_ride",
+                passenger_id: 1,
+                response: true
+            });
+            socket.send(message);
+        }
+    }
     //// END QUEUE SOCKET
 
     /// BEGIN RIDE SOCKET
@@ -166,7 +188,7 @@ export default function Map() {
     return (
         <View style={style.container}>
 
-        
+        <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
         { origin && 
         <View style={style.mapContainer}>
             <MapView

@@ -64,7 +64,6 @@ export const ProfileContainer = Styled.View`
     height: "fit-content";
     elevation: 20;
     padding: 10px;
-    padding-top: 14px;
     border-radius: 10px;
     background-color: white;
     position: relative;
@@ -76,7 +75,6 @@ export const ProfileInfoContainer = Styled.View`
     alignItems: center;
     gap: 8px;
     flex: 1;
-    margin-top: 5px ;
 `;
 
 export const ProfileImg = Styled.Image`

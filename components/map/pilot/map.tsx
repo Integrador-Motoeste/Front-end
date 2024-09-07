@@ -5,7 +5,7 @@ import MapView, { Marker } from "react-native-maps";
 import { style } from "./styles";
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
-import { Notification } from "@/components/notification";
+import { Notification } from "@/components/notifications/notification";
 import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
