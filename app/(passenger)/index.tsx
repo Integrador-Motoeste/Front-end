@@ -5,7 +5,7 @@ import { Text, View } from '@/components/Themed';
 import Map from '@/components/map/passenger/map';
 
 export default function TabOneScreen() {
-  const [isSearching, setIsSearching] = useState(false); //Alterar para true para mostrar o pop-up
+  const [isSearching, setIsSearching] = useState(false); 
 
   const handleCancel = () => {
     setIsSearching(false);

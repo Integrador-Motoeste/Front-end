@@ -59,6 +59,22 @@ export default function TabLayout() {
         options={{
           title: 'Pagamento',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
+        name="ride/[id]"
+        options={{
+          title: 'Corrida',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
+        name="ridehistory/index"
+        options={{
+          title: 'Histórico',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
     </Tabs>

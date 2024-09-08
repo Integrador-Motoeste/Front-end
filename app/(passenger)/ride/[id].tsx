@@ -2,19 +2,32 @@ import { View, Vibration } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
-import { style } from "./styles";
+import {style} from "./styles"
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
 import { Notification } from "@/components/notifications/notification";
 import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
-import { router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
+const temp_origin = {
+    latitude : -6.130435,
+    longitude: -38.4014183,
+}
 
-export default function Map() {
+const temp_destination = {
+    lat : -6.112170799999999,
+    lng: -38.3067149,
+}
+
+
+export default function RidePassengerExecution() {
+    const {id} = useLocalSearchParams();
+
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const mapRef = useRef<any>(null);
@@ -33,78 +46,19 @@ export default function Map() {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/10/pilot/`)
+        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
         }
-
-        socket.onmessage = (event: any) => {
-            const data = JSON.parse(event.data);
-            console.log(data);
-            if (data.type === 'ride_request') {
-                Vibration.vibrate(1000)
-                setPassengerId(data.passenger_id);
-                setHasRide(true);
-            }
-            if (data.type === 'pilot_confirmed') {
-                if (data.response === false){
-                    setHasRide(false);
-                    setAwaitingConfirmation(false);
-                    setIsSearching(true);
-                    setPassengerId(null);
-                }else if (data.response === true){
-                    router.push(`(pilot)/ride/${data.ride_id}`)
-                }
-            }
-            if (data.type == 'passenger_not_found'){
-                setHasRide(false);
-                setAwaitingConfirmation(false);
-                setIsSearching(true);
-                setPassengerId(null);
-            }
-        }
-
-        setIsSearching(true);
-        setSocket(socket);
     }
 
-    const acceptRide = () => {
-        if (socket) {
-            const message = JSON.stringify({
-                type: "respond_ride",
-                pilot_id: 10,
-                passenger_id: passengerId,
-                response: true
-            });
-            socket.send(message);
-            setHasRide(false);
-            setAwaitingConfirmation(true);
-            setIsSearching(false);
-        }
-    }
+    useEffect(() => {
+        connectSocket();
+        setOrigin(temp_origin);
+        setDestination(temp_destination);
+    }, [])
 
-    const declineRide = () => {
-        if (socket) {
-            const message = JSON.stringify({
-                type: "respond_ride",
-                pilot_id: 10,
-                passenger_id: passengerId,
-                response: false
-            });
-            socket.send(message);
-            setHasRide(false);
-        }
-    }
-
-    const cancelSearching = () => {
-        if (socket) {
-            socket.close();
-            setIsSearching(false);
-            setAwaitingConfirmation(false);
-            setPassengerId(null);
-        }
-    }
 
 
     //// END SOCKET
@@ -220,6 +174,7 @@ export default function Map() {
                                 }}
                                 identifier="destination"
                                 title="Destino"
+                                pinColor="#1FD87F"
                             ></Marker>
                         )}
 
@@ -243,28 +198,6 @@ export default function Map() {
             )}
 
 
-            {isSearching ? (
-                hasRide ? (
-                    <Notification
-                    accept={acceptRide}
-                    decline={declineRide}
-                    ></Notification>
-                ) : (
-                    <SearchingPop
-                        onCancel={cancelSearching}
-                        visible={isSearching}
-                        message="Procurando Corridas"
-                    ></SearchingPop>
-                )
-            ) : awaitingConfirmation ? (
-                <SearchingPop
-                hasButton={false}
-                visible={awaitingConfirmation}
-                message="Esperando Confirmação"
-                ></SearchingPop>
-            ) : (
-                <Button onPress={connectSocket} title="Procurar Corrida"></Button>
-            )}
         </View>
     );
 }

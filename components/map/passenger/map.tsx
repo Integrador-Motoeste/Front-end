@@ -13,6 +13,7 @@ import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import { to_br_real } from "@/components/utils/to-real";
 import { PassengerNotification } from "@/components/notifications/passengerConfirm";
+import { router } from "expo-router";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
 
@@ -38,7 +39,6 @@ export default function Map() {
             const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/1/passenger/`);
     
             socket.onopen = () => {
-                console.log('Connected to the server');
                 setSocket(socket);
                 resolve(socket); 
             };
@@ -59,6 +59,7 @@ export default function Map() {
     };
     
     const requestRide = async () => {
+
         try {
             const socket = await connectSocket() as WebSocket;
             const message = JSON.stringify({
@@ -84,6 +85,7 @@ export default function Map() {
             const message = JSON.stringify({
                 type: "confirm_pilot",
                 pilot_id: 10,
+                ride_id: null,
                 response: false
             });
             socket.send(message);
@@ -91,20 +93,23 @@ export default function Map() {
         }
     }
 
-    const acceptPilot = () => {
+    const acceptPilot = async () => {
         if (socket) {
+
+            /// WILL CALL CREATE RIDE HERE THEN SEND TO PILOT
+            console.log(origin);
             const message = JSON.stringify({
-                type: "receive_accept_pilot",
-                passenger_id: 1,
+                type: "confirm_pilot",
+                ride_id: 5,
+                pilot_id: pilotId,
                 response: true
             });
-            socket.send(message);
+            await socket.send(message);
+            setHasPilot(false);
+            router.push(`/(passenger)/ride/5`);
         }
     }
     //// END QUEUE SOCKET
-
-    /// BEGIN RIDE SOCKET
-
 
 
     function handleOriginPlaceChange(data:any) {
