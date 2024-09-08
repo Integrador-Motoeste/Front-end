@@ -7,12 +7,24 @@ import UserIcon from '@/assets/SVG/user-icon';
 import SmallTextContent from '@/components/smallTextContent';
 import BigTextContent from '@/components/bigTextContent';
 import InfoMotorcycle from '@/components/infoMotorcycle';
+import { useUser } from '@clerk/clerk-expo';
+import ExitButton from '@/components/exitButton';
 
 export default function Profile() {
+  const { isSignedIn, user } = useUser();
+  
+  if(!isSignedIn) {
+    return null;
+  } 
+
   return (
     <Container>
       <Header>
+        <TitleContext>
         <Title>Meu Perfil</Title>
+        <ExitButton/>
+        </TitleContext>
+        
         <ProfileSection>
           <ProfileImageContainer>
             <UserIcon/>
@@ -20,7 +32,7 @@ export default function Profile() {
           </ProfileImageContainer>
           <ProfileInfo>
             <Rating><StarIcon/> 5.0</Rating>
-            <NameUser>Davy Eduardo Costa Dantassssss dasndadaçdamdpodadasldlçasdçlas,dçlkdmalskd</NameUser>
+            <NameUser>{user.firstName} {user.lastName}</NameUser>
           </ProfileInfo>
         </ProfileSection>
       </Header>
@@ -30,9 +42,9 @@ export default function Profile() {
           <BigTextContent label='Saldo' text='R$ 12,00'/>
 
         <InfoGrid>
-          <SmallTextContent label='Telefone' text='(84) 98147-9999'/>
+          <SmallTextContent label='Telefone' text={user.phoneNumbers && user.phoneNumbers.length > 0 ? user.phoneNumbers[0].phoneNumber : 'Nenhum'}/>
           <SmallTextContent label='CPF' text='123.456.789-10'/>
-          <SmallTextContent label='Email' text='josesze@email.com'/>
+          <SmallTextContent label='Email' text={user.emailAddresses[0].emailAddress}/>
           <SmallTextContent label='CNH' text='66602962477'/> 
         </InfoGrid>
 
@@ -57,12 +69,17 @@ const Container = styled(SafeAreaView)`
   align-items: center;
 `;
 
+const TitleContext = styled.View`
+  justify-content: space-between;
+  display: flex;
+  align-items: baseline;
+  flex-direction: row;
+`;
+
 const Title = styled.Text`
   color: white;
   font-size: 26px;
-  text-align: left;
   font-family: "Inter_500Medium";
-  width: 100%;
 `;
 
 const ProfileSection = styled.View`
@@ -102,7 +119,7 @@ const Rating = styled.Text`
   font-size: 16px;
   position: absolute;
   top: -20%;
-  right: 20%;
+  right: 23%;
   margin: 0;
   padding: 0;
 `;
@@ -111,7 +128,7 @@ const NameUser = styled.Text`
   color: white;
   font-size: 18px;
   font-family: "Inter_400Regular";
-  width: 80%;
+  width: 78%;
 `;
 
 const BalanceCard = styled.View`

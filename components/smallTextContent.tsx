@@ -25,7 +25,7 @@ export default function SmallTextContent({ children, label, text }: SmallTextCon
 
 
 const Container = styled.View`
-    min-width: 47px;
+    min-width: 180px;
     width: auto;
     max-width: 80%;
     display: flex;
