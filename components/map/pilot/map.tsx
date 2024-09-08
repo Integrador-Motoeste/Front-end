@@ -41,7 +41,6 @@ export default function Map() {
 
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
-            console.log(data);
             if (data.type === 'ride_request') {
                 Vibration.vibrate(1000)
                 setPassengerId(data.passenger_id);
@@ -54,7 +53,6 @@ export default function Map() {
                     setIsSearching(true);
                     setPassengerId(null);
                 }else if (data.response === true){
-                    router.push(`(pilot)/ride/${data.ride_id}`)
                 }
             }
             if (data.type == 'passenger_not_found'){

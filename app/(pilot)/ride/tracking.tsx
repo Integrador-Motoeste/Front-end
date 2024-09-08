@@ -26,7 +26,7 @@ const temp_destination = {
 
 
 export default function RidePassengerExecution() {
-    const {id} = useLocalSearchParams();
+    const [id, setId] = useState<any>(5);
 
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
@@ -36,7 +36,7 @@ export default function RidePassengerExecution() {
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
     const [price, setPrice] = useState<number>(0);
-
+    const [isBoarded, setIsBoarded] = useState(false);
 
     const [socket, setSocket] = useState<any>(null);
     const [passengerId, setPassengerId] = useState<any>(null);
@@ -51,6 +51,24 @@ export default function RidePassengerExecution() {
 
         socket.onopen = () => {
             setSocket(socket);
+        }
+
+        socket.onmessage = (event: any) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'confirm_boarding'){
+                setIsBoarded(true);
+            }
+        }
+    }
+
+    const send_current_position = () => {
+        if (socket && position) {
+            socket.send(JSON.stringify({
+                type: 'change_pilot_position',
+                ride_id: id,
+                latitude: position.latitude,
+                longitude: position.longitude
+            }))
         }
     }
 
@@ -88,8 +106,6 @@ export default function RidePassengerExecution() {
     }, [])
 
     useEffect(() => {
-
-
         if (origin && destination && position) {
             setTimeout(() => {
                 mapRef.current.fitToSuppliedMarkers(["origin", "destination", "position"], {
@@ -97,7 +113,7 @@ export default function RidePassengerExecution() {
                 });
             }, 0);
         }
-    }, [origin, destination]);
+    }, [[origin, destination, position]]);
 
     useEffect(() => {
         const getTravelTime = async () => {
@@ -134,10 +150,13 @@ export default function RidePassengerExecution() {
         watchPositionAsync(
             {
                 accuracy: LocationAccuracy.Highest,
-                timeInterval: 1000,
+                timeInterval: 5000,
                 distanceInterval: 10,
             },
             (location) => {
+                if (position.latitude !== location.coords.latitude && position.longitude !== location.coords.longitude) {
+                    send_current_position();
+                }
                 setPosition({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
@@ -160,6 +179,7 @@ export default function RidePassengerExecution() {
                             latitudeDelta: 0.0922,
                             longitudeDelta: 0.0421,
                         }}
+                        accessibilityElementsHidden={true}
                     >
                         <Marker
                             coordinate={{
@@ -194,26 +214,35 @@ export default function RidePassengerExecution() {
                         )}
 
                         {origin && destination && position && (
-                            <>
+                            isBoarded ? (
+                                <MapViewDirections
+                                origin={{
+                                    latitude: origin.latitude,
+                                    longitude: origin.longitude,
+                                }}
+                                destination={{
+                                    latitude: destination.lat,
+                                    longitude: destination.lng,
+                                }}
+                                apikey={google_key}
+                                strokeWidth={5}
+                                strokeColor="blue"
+                                />
+                            ):(
                                 <MapViewDirections
                                     origin={{
+                                        latitude: position.latitude,
+                                        longitude: position.longitude,
+                                    }}
+                                    destination={{
                                         latitude: origin.latitude,
                                         longitude: origin.longitude,
                                     }}
-                                    destination={{
-                                        latitude: destination.lat,
-                                        longitude: destination.lng,
-                                    }}
-                                    waypoints={[{
-                                        latitude: position.latitude,
-                                        longitude: position.longitude,
-                                    }]}
                                     apikey={google_key}
                                     strokeWidth={5}
                                     strokeColor="blue"
-                                />
-                            </>
-                            
+                                    />
+                            )
                         )}
                     </MapView>
                 </View>

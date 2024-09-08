@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, SplashScreen, Tabs } from 'expo-router';
+import { Link, SplashScreen, Tabs, useSegments, useRouter, useLocalSearchParams } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
-
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -20,7 +19,20 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const segments = useSegments();
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const [indexLink, setIndexLink] = useState<string | null>(null);
 
+  useEffect(() => {
+    console.log(segments)
+    if (segments.includes('tracking')) {
+      setIndexLink(`(passenger)/ride/tracking/`);
+    }else{
+      setIndexLink('/');
+    }
+    console.log(indexLink)
+  }, [segments])
 
   return (
     <Tabs
@@ -36,7 +48,7 @@ export default function TabLayout() {
           title: 'Corrida',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
-            <Link href="/" asChild>
+            <Link href={indexLink} asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
@@ -61,17 +73,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="payments/payment"
         options={{
-          title: 'Pagamento',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          tabBarButton: () => null,
+          href: null,
         }}
       />
       <Tabs.Screen
-        name="ride/[id]"
+        name="ride/tracking"
         options={{
-          title: 'RidE',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          tabBarButton: () => null,
+          href: null,
         }}
       />
       <Tabs.Screen

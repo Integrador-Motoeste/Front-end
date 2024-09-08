@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { useLocalSearchParams } from "expo-router";
-
+import { measure } from "react-native-reanimated";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -26,7 +26,7 @@ const temp_destination = {
 
 
 export default function RidePassengerExecution() {
-    const {id} = useLocalSearchParams();
+    const [id, setId] = useState<any>(5);
 
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
@@ -35,7 +35,8 @@ export default function RidePassengerExecution() {
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
     const [price, setPrice] = useState<number>(0);
-
+    const [pilotCoords, setPilotCoords] = useState<any>(null);
+    const [isBoarded, setIsBoarded] = useState(false);
 
     const [socket, setSocket] = useState<any>(null);
     const [passengerId, setPassengerId] = useState<any>(null);
@@ -51,6 +52,16 @@ export default function RidePassengerExecution() {
         socket.onopen = () => {
             setSocket(socket);
         }
+
+        socket.onmessage = (event: any) => {
+            const data = JSON.parse(event.data);
+            if (data.type == 'pilot_position'){
+                setPilotCoords({
+                    latitude: data.latitude,
+                    longitude: data.longitude
+                });
+            }
+        }
     }
 
     useEffect(() => {
@@ -59,7 +70,16 @@ export default function RidePassengerExecution() {
         setDestination(temp_destination);
     }, [])
 
-
+    const confirm_boarding = () => {
+        setIsBoarded(true);
+        if (socket){
+            const message = JSON.stringify({
+                type: 'confirm_boarding',
+                ride_id: id,
+            })
+            socket.send(message);
+        }
+    }
 
     //// END SOCKET
 
@@ -89,12 +109,12 @@ export default function RidePassengerExecution() {
     useEffect(() => {
         if (origin && destination) {
             setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
+                mapRef.current.fitToSuppliedMarkers(["origin", "destination", "pilot"], {
                     edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 });
             }, 0);
         }
-    }, [origin, destination]);
+    }, [[origin, destination, pilotCoords]]);
 
     useEffect(() => {
         const getTravelTime = async () => {
@@ -177,6 +197,17 @@ export default function RidePassengerExecution() {
                                 pinColor="#1FD87F"
                             ></Marker>
                         )}
+                        {pilotCoords && (
+                            <Marker
+                                coordinate={{
+                                    latitude: pilotCoords.latitude,
+                                    longitude: pilotCoords.longitude,
+                                }}
+                                identifier="pilot"
+                                title="Piloto"
+                                pinColor="#F0E822"
+                            ></Marker>
+                        )}
 
                         {origin && destination && (
                             <MapViewDirections
@@ -196,7 +227,9 @@ export default function RidePassengerExecution() {
                     </MapView>
                 </View>
             )}
-
+            {!isBoarded && (
+                <Button onPress={confirm_boarding} title="Confirmar embarque"></Button>
+            )}
 
         </View>
     );

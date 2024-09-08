@@ -57,17 +57,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="payments/payment"
         options={{
-          title: 'Pagamento',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          tabBarButton: () => null,
+          href: null,
         }}
       />
       <Tabs.Screen
-        name="ride/[id]"
+        name="ride/tracking"
         options={{
-          title: 'Corrida',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          tabBarButton: () => null,
+          href: null,
         }}
       />
       <Tabs.Screen

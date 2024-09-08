@@ -97,7 +97,6 @@ export default function Map() {
         if (socket) {
 
             /// WILL CALL CREATE RIDE HERE THEN SEND TO PILOT
-            console.log(origin);
             const message = JSON.stringify({
                 type: "confirm_pilot",
                 ride_id: 5,
@@ -106,7 +105,6 @@ export default function Map() {
             });
             await socket.send(message);
             setHasPilot(false);
-            router.push(`/(passenger)/ride/5`);
         }
     }
     //// END QUEUE SOCKET
@@ -207,6 +205,7 @@ export default function Map() {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
             }}
+            accessibilityElementsHidden={false}
             >
                 <Marker
                 coordinate={{
