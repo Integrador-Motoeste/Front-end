@@ -27,11 +27,12 @@ export default function Map() {
     const [passengerId, setPassengerId] = useState<any>(null);
     const [hasRide, setHasRide] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/1/pilot/`)
+        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/10/pilot/`)
 
         socket.onopen = () => {
             console.log('Connected to the server');
@@ -39,12 +40,21 @@ export default function Map() {
         }
 
         socket.onmessage = (event: any) => {
-            console.log(event.data);
             const data = JSON.parse(event.data);
+            console.log(data);
             if (data.type === 'ride_request') {
                 Vibration.vibrate(1000)
                 setPassengerId(data.passenger_id);
                 setHasRide(true);
+            }
+            if (data.type === 'pilot_confirmed') {
+                console.log(data.response);
+                if (data.response == false){
+                    setHasRide(false);
+                    setAwaitingConfirmation(false);
+                    setIsSearching(true);
+                    setPassengerId(null);
+                }
             }
         }
 
@@ -56,12 +66,13 @@ export default function Map() {
         if (socket) {
             const message = JSON.stringify({
                 type: "respond_ride",
-                pilot_id: 1,
+                pilot_id: 10,
                 passenger_id: passengerId,
                 response: true
             });
             socket.send(message);
             setHasRide(false);
+            setAwaitingConfirmation(true);
             setIsSearching(false);
         }
     }
@@ -70,7 +81,7 @@ export default function Map() {
         if (socket) {
             const message = JSON.stringify({
                 type: "respond_ride",
-                pilot_id: 1,
+                pilot_id: 10,
                 passenger_id: passengerId,
                 response: false
             });
@@ -83,9 +94,10 @@ export default function Map() {
         if (socket) {
             socket.close();
             setIsSearching(false);
+            setAwaitingConfirmation(false);
+            setPassengerId(null);
         }
     }
-
 
 
     //// END SOCKET
@@ -223,6 +235,7 @@ export default function Map() {
                 </View>
             )}
 
+
             {isSearching ? (
                 hasRide ? (
                     <Notification
@@ -236,6 +249,12 @@ export default function Map() {
                         message="Procurando Corridas"
                     ></SearchingPop>
                 )
+            ) : awaitingConfirmation ? (
+                <SearchingPop
+                hasButton={false}
+                visible={awaitingConfirmation}
+                message="Esperando Confirmação"
+                ></SearchingPop>
             ) : (
                 <Button onPress={connectSocket} title="Procurar Corrida"></Button>
             )}

@@ -37,12 +37,12 @@ export function Notification({accept, decline}: pilotProps) {
                         <Place>{truncateName('Avenida 13 de Maio', 80)}</Place>
                     </PlacesContainer>
                     <ProfileMainContainer>
-                        <ProfileContainer>
                         <BadgeContainer>
                             <Badge value="8,7 Km"/>
                             <Badge value="20 min"/>
                             <Badge color={"#34C17D"} value="R$ 10,00"/>
                         </BadgeContainer>
+                        <ProfileContainer>
                             <StarContainer>
                                 <StarImg source={require('../../../assets/images/notification/star.png')}/>
                                 <StarNumber>4.5</StarNumber>

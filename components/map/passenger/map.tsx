@@ -29,6 +29,8 @@ export default function Map() {
 
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
+    const [hasPilot, setHasPilot] = useState(false);
+    const [pilotId, setPilotId] = useState<any>(null);
 
     // BEGIN QUEUE SOCKET
     const connectSocket = async () => {
@@ -49,8 +51,8 @@ export default function Map() {
             socket.onmessage = (event: any) => {
                 const data = JSON.parse(event.data);
                 if (data.type === 'ride_response') {
-                    cancelRide();
-                    Alert.alert('Piloto encontrado', 'Seu piloto está a caminho!');
+                    setPilotId(data.pilot_id);
+                    setHasPilot(true);
                 }
             }
         });
@@ -77,21 +79,22 @@ export default function Map() {
         }
     };
 
-    const declinePilot = () => {
+    const declinePilot = async () => {
         if (socket) {
             const message = JSON.stringify({
-                type: "respond_ride",
-                passenger_id: 1,
+                type: "confirm_pilot",
+                pilot_id: 10,
                 response: false
             });
             socket.send(message);
+            setHasPilot(false);
         }
     }
 
     const acceptPilot = () => {
         if (socket) {
             const message = JSON.stringify({
-                type: "respond_ride",
+                type: "receive_accept_pilot",
                 passenger_id: 1,
                 response: true
             });
@@ -188,7 +191,6 @@ export default function Map() {
     return (
         <View style={style.container}>
 
-        <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
         { origin && 
         <View style={style.mapContainer}>
             <MapView
@@ -240,10 +242,13 @@ export default function Map() {
             </MapView>
         </View>
         }
+
     
-        { isConfirmed ?
+        { hasPilot ?
+            <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
+        : isConfirmed ? (
             <SearchingPop visible={isConfirmed} onCancel={() => cancelRide()} message="Procurando pilotos disponíveis..."/>
-        :
+        ) :
             (
             <View style={[
                 origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
