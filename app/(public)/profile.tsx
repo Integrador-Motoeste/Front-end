@@ -1,6 +1,6 @@
 import styled from 'styled-components/native';
 import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, View, Text } from 'react-native';
+import { SafeAreaView, ScrollView} from 'react-native';
 import Header from '@/components/header';
 import StarIcon from '@/assets/SVG/star-icon';
 import UserIcon from '@/assets/SVG/user-icon';
@@ -42,6 +42,7 @@ export default function Profile() {
 
   return (
     <Container>
+      <ScrollView contentContainerStyle={{ marginRight: 80 }}>
       <Header>
         <TitleContext>
           <Title>Meu Perfil</Title>
@@ -60,7 +61,6 @@ export default function Profile() {
       </Header>
 
       <ContentProfile>
-        <ScrollView contentContainerStyle={{ padding: 3 }}>
         <BigTextContent label="Saldo" text="R$ 12,00" />
 
         <InfoGrid>
@@ -71,6 +71,7 @@ export default function Profile() {
                 value={editedPhone}
                 onChangeText={setEditedPhone}
                 keyboardType="phone-pad"
+                selectionColor='black'
               />
             </PhoneBox> 
           ) : (
@@ -84,8 +85,8 @@ export default function Profile() {
         <VehicleCard>
           <InfoMotorcycle motorCycle={{ image: '', brand: 'brand', model: 'model', year: 2021 }} />
         </VehicleCard>
-
-        <ButtonContainer>
+      </ContentProfile>
+      <ButtonContainer>
           {isEditing ? (
             <>
               <StyledButton onPress={handleSave} title="Salvar" />
@@ -96,7 +97,6 @@ export default function Profile() {
           )}
         </ButtonContainer>
         </ScrollView>
-      </ContentProfile>
     </Container>
   );
 }
@@ -186,8 +186,8 @@ const VehicleCard = styled.View`
 
 const ButtonContainer = styled.View`
   flex-direction: row;
-  justify-content: space-between;
   margin-top: 20px;
+  margin-left: 10px;
 `;
 
 const PhoneInput = styled.TextInput`
@@ -198,6 +198,9 @@ const PhoneInput = styled.TextInput`
   border-radius: 10px;
   color: white;
   background-color: #1FD87F;
+  border-width: 1.5px;
+  border-style: solid;
+  border-color: black;
 `;
 
 const PhoneBox = styled.View`
@@ -213,7 +216,7 @@ const PhoneText = styled.Text`
 `;
 
 const StyledButton = styled(Button)`
-  width: 30%;
+  width: 25%;
 `;
 
 const StyledCancelButton = styled(StyledButton)`
