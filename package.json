@@ -17,6 +17,7 @@
     "@expo-google-fonts/dev": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^6.1.18",
+    "axios": "^1.7.7",
     "expo": "^51.0.31",
     "expo-app-loading": "^1.0.3",
     "expo-auth-session": "~5.5.2",

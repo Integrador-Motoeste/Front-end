@@ -27,9 +27,9 @@ export default function Profile() {
         
         <ProfileSection>
           <ProfileImageContainer>
-            <UserIcon/>
-            {/* <ProfileImage/> */}
+            <ProfileImage source={{ uri: user?.imageUrl }}/>
           </ProfileImageContainer>
+          
           <ProfileInfo>
             <Rating><StarIcon/> 5.0</Rating>
             <NameUser>{user.firstName} {user.lastName}</NameUser>
@@ -92,10 +92,13 @@ const ProfileSection = styled.View`
 `;
 
 const ProfileImage = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-radius: 30px;
+  width: 70px;
+  height: 70px;
+  border-radius: 40px;
   background-color: #fff;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ProfileImageContainer = styled.View`
