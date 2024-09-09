@@ -1,6 +1,6 @@
 import styled from 'styled-components/native';
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { SafeAreaView, ScrollView, View, Text } from 'react-native';
 import Header from '@/components/header';
 import StarIcon from '@/assets/SVG/star-icon';
 import UserIcon from '@/assets/SVG/user-icon';
@@ -9,50 +9,94 @@ import BigTextContent from '@/components/bigTextContent';
 import InfoMotorcycle from '@/components/infoMotorcycle';
 import { useUser } from '@clerk/clerk-expo';
 import ExitButton from '@/components/exitButton';
+import Button from '@/components/Button';
 
 export default function Profile() {
   const { isSignedIn, user } = useUser();
-  
-  if(!isSignedIn) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [phone, setPhone] = useState(() => {
+    if (user && user.phoneNumbers && user.phoneNumbers.length > 0) {
+      return user.phoneNumbers[0].phoneNumber;
+    }
+    return 'Nenhum';
+  });
+  const [editedPhone, setEditedPhone] = useState(phone);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setEditedPhone(phone);
+    setIsEditing(false);
+  };
+
+  const handleSave = () => {
+    setPhone(editedPhone);
+    setIsEditing(false);
+  };
+
+  if (!isSignedIn) {
     return null;
-  } 
+  }
 
   return (
     <Container>
       <Header>
         <TitleContext>
-        <Title>Meu Perfil</Title>
-        <ExitButton/>
+          <Title>Meu Perfil</Title>
+          <ExitButton />
         </TitleContext>
-        
+
         <ProfileSection>
           <ProfileImageContainer>
-            <UserIcon/>
-            {/* <ProfileImage/> */}
+            <UserIcon />
           </ProfileImageContainer>
           <ProfileInfo>
-            <Rating><StarIcon/> 5.0</Rating>
+            <Rating><StarIcon /> 5.0</Rating>
             <NameUser>{user.firstName} {user.lastName}</NameUser>
           </ProfileInfo>
         </ProfileSection>
       </Header>
 
       <ContentProfile>
-        
-          <BigTextContent label='Saldo' text='R$ 12,00'/>
+        <ScrollView contentContainerStyle={{ padding: 3 }}>
+        <BigTextContent label="Saldo" text="R$ 12,00" />
 
         <InfoGrid>
-          <SmallTextContent label='Telefone' text={user.phoneNumbers && user.phoneNumbers.length > 0 ? user.phoneNumbers[0].phoneNumber : 'Nenhum'}/>
-          <SmallTextContent label='CPF' text='123.456.789-10'/>
-          <SmallTextContent label='Email' text={user.emailAddresses[0].emailAddress}/>
-          <SmallTextContent label='CNH' text='66602962477'/> 
+        {isEditing ? (
+            <PhoneBox>
+              <PhoneText>Telefone</PhoneText>
+              <PhoneInput
+                value={editedPhone}
+                onChangeText={setEditedPhone}
+                keyboardType="phone-pad"
+              />
+            </PhoneBox> 
+          ) : (
+            <SmallTextContent label="Telefone" text={phone} />
+          )}
+          <SmallTextContent label="CPF" text="123.456.789-10" />
+          <SmallTextContent label="Email" text={user.emailAddresses[0].emailAddress} />
+          <SmallTextContent label="CNH" text="66602962477" />
         </InfoGrid>
 
         <VehicleCard>
-          <InfoMotorcycle motorCycle={{image: '', brand: 'brand', model: 'model', year: 2021}}/>
+          <InfoMotorcycle motorCycle={{ image: '', brand: 'brand', model: 'model', year: 2021 }} />
         </VehicleCard>
-      </ContentProfile>
 
+        <ButtonContainer>
+          {isEditing ? (
+            <>
+              <StyledButton onPress={handleSave} title="Salvar" />
+              <StyledCancelButton  onPress={handleCancel} title="Cancelar" />
+            </>
+          ) : (
+            <StyledButton onPress={handleEdit} title="Editar" />
+          )}
+        </ButtonContainer>
+        </ScrollView>
+      </ContentProfile>
     </Container>
   );
 }
@@ -60,13 +104,15 @@ export default function Profile() {
 const ContentProfile = styled.View`
   flex: 1;
   width: 100%;
-  padding: 0 5% 0 5%;
+  padding: 0 5%;
 `;
 
 const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: #fff;
   align-items: center;
+  margin-Bottom: 90px;
+  padding-top: 30px;
 `;
 
 const TitleContext = styled.View`
@@ -89,13 +135,6 @@ const ProfileSection = styled.View`
   height: 70px;
   width: 100%;
   gap: 10px;
-`;
-
-const ProfileImage = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-radius: 30px;
-  background-color: #fff;
 `;
 
 const ProfileImageContainer = styled.View`
@@ -131,49 +170,11 @@ const NameUser = styled.Text`
   width: 78%;
 `;
 
-const BalanceCard = styled.View`
-  background-color: #F2F2F2;
-  padding: 15px;
-  border-radius: 10px;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const BalanceText = styled.Text`
-  color: #1FD87F;
-  font-size: 18px;
-`;
-
-const BalanceAmount = styled.Text`
-  color: #1FD87F;
-  font-size: 24px;
-  font-weight: bold;
-`;
-
 const InfoGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 10px;
-`;
-
-const InfoItem = styled.View`
-  width: 48%;
-  background-color: #1FD87F;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-`;
-
-const InfoLabel = styled.Text`
-  color: white;
-  font-size: 14px;
-`;
-
-const InfoText = styled.Text`
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
 `;
 
 const VehicleCard = styled.View`
@@ -183,16 +184,38 @@ const VehicleCard = styled.View`
   width: 100%;
 `;
 
-const VehicleIndicator = styled.View`
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  background-color: #1FD87F;
-  margin-right: 10px;
+const ButtonContainer = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
 `;
 
-const VehicleInfo = styled.Text`
-  color: #1FD87F;
-  font-size: 16px;
-  font-weight: bold;
+const PhoneInput = styled.TextInput`
+  min-width: 180px;
+  max-width: 80%;
+  padding: 10px;
+  font-size: 18px;
+  border-radius: 10px;
+  color: white;
+  background-color: #1FD87F;
+`;
+
+const PhoneBox = styled.View`
+  min-width: 180px;
+  max-width: 80%; 
+`;
+
+const PhoneText = styled.Text`
+  color: #7d7d7d86;
+  font-size: 15px;
+  font-family: "Inter_700Bold";
+  margin: 0;
+`;
+
+const StyledButton = styled(Button)`
+  width: 30%;
+`;
+
+const StyledCancelButton = styled(StyledButton)`
+  background-color: red;
 `;
