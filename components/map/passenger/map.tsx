@@ -68,6 +68,16 @@ export default function Map({onRide}: mapsProps) {
             const message = JSON.stringify({
                 type: "request_ride",
                 passenger_id: 1,
+                origin: origin,
+                destination: {
+                    latitude: destination.lat,
+                    longitude: destination.lng
+                },
+                info: {
+                    distance: distance,
+                    duration: duration,
+                    price: price,
+                }
             });
             socket.send(message); 
             setIsConfirmed(true);
@@ -135,6 +145,12 @@ export default function Map({onRide}: mapsProps) {
 
     useEffect(() => {
         requestLocalPermissions();
+
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
     }, [])
 
     useEffect(() => {
@@ -277,21 +293,6 @@ export default function Map({onRide}: mapsProps) {
                                 <Badge value={distance}></Badge>
                                 <Badge value={duration}></Badge>
                                 <Badge color={"#34C17D"} value={price}></Badge>
-                            </View>
-                            <View style={{
-                                borderWidth: 1,
-                                borderColor: "#34C17D",
-                                borderRadius: 20,
-                                width: "80%",
-                            }}>
-                                <RNPickerSelect
-                                    onValueChange={(value) => console.log(value)}
-                                    items={[
-                                        { label: 'Pix', value: 'pix' },
-                                        { label: 'Cartão de Crédito', value: 'credit-card' },
-                                    ]}
-                                    placeholder={{label:"Pagamento", value: null}}
-                                />
                             </View>
                             <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
                         </View>

@@ -11,42 +11,76 @@ import MotoIcon from "@/assets/SVG/moto";
 import ArrowIcon from "@/assets/SVG/arrow";
 import { ModalContainer, ModalContent } from "./styles";
 import { truncateName } from "@/components/utils/truncate-text";
+import GoogleMapsService from "@/app/services/google";
+import { useState } from "react";
 
 
 interface pilotProps {
     accept: () => void;
     decline: () => void;
+    origin: {
+        latitude: number;
+        longitude: number;
+    };
+    destination: {
+        latitude: number;
+        longitude: number;
+    };
+    position: {};
+    value: string | number;
+    duration: string;
+    distance: string;
+    passenger_id : number;
 }
 
-export function Notification({accept, decline}: pilotProps) {
+
+
+export function Notification(pilotProps: pilotProps) {
+
+    const service = new GoogleMapsService();
+    const [origin, setOrigin] = useState<any>(null);
+    const [destination, setDestination] = useState<any>(null);
+
+    const fecthPlaces = async () => {
+        const origin_name = await service.getPlaceFromCoordinates(pilotProps.origin.latitude, pilotProps.origin.longitude)
+        const destination_name = await service.getPlaceFromCoordinates(pilotProps.destination.latitude, pilotProps.destination.longitude)
+        
+        setOrigin(origin_name);
+        setDestination(destination_name);
+    }
+
+
+    useEffect(() => {
+        fecthPlaces();
+    }, []);
+
+
     return (
         <Modal
             visible={true}
             transparent={true}
             animationType="slide"
-            onRequestClose={decline}
+            onRequestClose={pilotProps.decline}
         >
             <ModalContainer>
                 <ModalContent>
                 <Icon>
                     <MotoIcon width={86} height={86}/>
                 </Icon>
-                    <PlacesContainer>
-                        <Place>{truncateName('Rua Princesa Isabel', 80)}</Place>
-                        <ArrowIcon width={32} height={32}/>
-                        <Place>{truncateName('Avenida 13 de Maio', 80)}</Place>
-                    </PlacesContainer>
+                        {origin && destination && (
+                            <PlacesContainer>
+                                <Place>{truncateName(origin, 60)}</Place>
+                                <ArrowIcon width={32} height={32}/>
+                                <Place>{truncateName(destination, 60)}</Place>
+                            </PlacesContainer>
+                        )}
                     <ProfileMainContainer>
                         <BadgeContainer>
-                            <Badge value="8,7 Km"/>
-                            <Badge value="20 min"/>
-                            <Badge color={"#34C17D"} value="R$ 10,00"/>
+                            <Badge value={pilotProps.distance}/>
+                            <Badge value={pilotProps.duration}/>
+                            <Badge color={"#34C17D"} value={pilotProps.value}/>
                         </BadgeContainer>
                         <ProfileContainer>
-                            <StarContainer>
-                                <StarImg source={require('../../../assets/images/notification/star.png')}/>
-                                <StarNumber>4.5</StarNumber>
-                            </StarContainer>
                             <ProfileInfoContainer>
                                 <ProfileImg source={require('../../../assets/images/notification/profile.png')}/>
                                 <ProfileName>{truncateName('Joao pedro', 80)}</ProfileName>
@@ -60,14 +94,14 @@ export function Notification({accept, decline}: pilotProps) {
                             buttonColor="#D81F1F" 
                             buttonWidth="40%" 
                             title="Recusar"
-                            onPress={decline}
+                            onPress={pilotProps.decline}
                         />
                         <Button
                             margin="0px"     
                             buttonHeight="32px" 
                             buttonWidth="40%" 
                             title="Aceitar"
-                            onPress={accept}
+                            onPress={pilotProps.accept}
                         />
                     </ButtonContainer>
                 </ModalContent>

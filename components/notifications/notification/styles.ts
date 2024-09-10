@@ -64,6 +64,7 @@ export const ProfileContainer = Styled.View`
     height: "fit-content";
     elevation: 20;
     padding: 10px;
+    margin: 12px;
     border-radius: 10px;
     background-color: white;
     position: relative;
@@ -135,7 +136,7 @@ export const ModalContainer = Styled.View`
 
 export const ModalContent = Styled.View`
     width: 75%;
-    height: 50%;
+    min-height: 50%;
     padding: 20px;
 
     display: flex;

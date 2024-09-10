@@ -20,6 +20,8 @@ interface MapProps {
 export default function Map({onRide}: MapProps) {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
+    const [position, setPosition] = useState<any>(null)
+
     const mapRef = useRef<any>(null);
 
     const [distance, setDistance] = useState<string>("");
@@ -45,9 +47,20 @@ export default function Map({onRide}: MapProps) {
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
             if (data.type === 'ride_request') {
-                Vibration.vibrate(1000)
-                setPassengerId(data.passenger_id);
-                setHasRide(true);
+                if (hasRide === false){
+
+                    Vibration.vibrate(1000)
+                    setPassengerId(data.passenger_id);
+
+                    setOrigin(data.origin);
+                    setDestination(data.destination);
+
+                    setDistance(data.info.distance);
+                    setPrice(data.info.price);
+                    setDuration(data.info.duration);
+                    
+                    setHasRide(true);
+                }
             }
             if (data.type === 'pilot_confirmed') {
                 if (data.response === false){
@@ -111,19 +124,12 @@ export default function Map({onRide}: MapProps) {
 
     //// END SOCKET
 
-    function handleOriginPlaceChange(data:any) {
-        setOrigin({
-            latitude: data.lat,
-            longitude: data.lng
-        })
-    }
-
     async function requestLocalPermissions() {
         const { granted } = await requestForegroundPermissionsAsync();
 
         if (granted) {
             const currentPosition = await getCurrentPositionAsync();
-            setOrigin({
+            setPosition({
                 latitude: currentPosition.coords.latitude,
                 longitude: currentPosition.coords.longitude,
             });
@@ -132,48 +138,13 @@ export default function Map({onRide}: MapProps) {
 
     useEffect(() => {
         requestLocalPermissions();
-    }, [])
 
-    useEffect(() => {
-        if (origin && destination) {
-            setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
-            }, 0);
-        }
-    }, [origin, destination]);
-
-    useEffect(() => {
-        const getTravelTime = async () => {
-            if (origin && destination) {
-                const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.latitude},${origin.longitude}&destinations=${destination.lat},${destination.lng}&language=pt-BR&mode=driving&key=${google_key}`;
-                try {
-                    const response = await fetch(URL);
-                    const data = await response.json();
-                    if (data.rows[0].elements[0].status === "OK") {
-                        setDistance(data.rows[0].elements[0].distance.text);
-
-                        const duration = data.rows[0].elements[0].duration.text
-                        .replace(" horas", "h")
-                        .replace(" hora", "h")
-                        .replace(" minutos", "min")
-                        .replace(" minuto", "min");
-                        setDuration(duration);
-
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
-                    } else {
-                        console.error("Error fetching distance data");
-                    }
-                } catch (error) {
-                    console.error("Error fetching distance data", error);
-                }
+        return () => {
+            if (socket) {
+                socket.close();
             }
         };
-    
-        getTravelTime();
-    }, [origin, destination]);
+    }, [])
 
     useEffect(() => {
         watchPositionAsync(
@@ -183,7 +154,7 @@ export default function Map({onRide}: MapProps) {
                 distanceInterval: 10,
             },
             (location) => {
-                setOrigin({
+                setPosition({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
                 });
@@ -194,62 +165,46 @@ export default function Map({onRide}: MapProps) {
     
     return (
         <View style={style.container}>
-            {origin && (
-                <View style={style.mapContainer}>
-                    <MapView
-                        ref={mapRef}
-                        style={style.map}
-                        initialRegion={{
-                            latitude: origin.latitude,
-                            longitude: origin.longitude,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
-                        }}
+
+
+        { position && 
+            <View style={style.mapContainer}>
+                <MapView
+                ref={mapRef} 
+                style={style.map}
+                initialRegion={{
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                }}
+                accessibilityElementsHidden={false}
+                >
+                    <Marker
+                    coordinate={{
+                        latitude: position.latitude,
+                        longitude: position.longitude
+                    }}
+                    identifier="origin"
+                    title="Origem"
                     >
-                        <Marker
-                            coordinate={{
-                                latitude: origin.latitude,
-                                longitude: origin.longitude,
-                            }}
-                            identifier="origin"
-                            title="Origem"
-                        ></Marker>
-                        {destination && (
-                            <Marker
-                                coordinate={{
-                                    latitude: destination.lat,
-                                    longitude: destination.lng,
-                                }}
-                                identifier="destination"
-                                title="Destino"
-                            ></Marker>
-                        )}
-
-                        {origin && destination && (
-                            <MapViewDirections
-                                origin={{
-                                    latitude: origin.latitude,
-                                    longitude: origin.longitude,
-                                }}
-                                destination={{
-                                    latitude: destination.lat,
-                                    longitude: destination.lng,
-                                }}
-                                apikey={google_key}
-                                strokeWidth={5}
-                                strokeColor="blue"
-                            />
-                        )}
-                    </MapView>
-                </View>
-            )}
-
-
+                    </Marker>
+                </MapView>
+            </View>
+        }
+            
             {isSearching ? (
                 hasRide ? (
                     <Notification
-                    accept={acceptRide}
-                    decline={declineRide}
+                        accept={acceptRide}
+                        decline={declineRide}
+                        origin={origin}
+                        destination={destination}
+                        position={position}
+                        value={price}
+                        duration={duration}
+                        distance={distance}
+                        passenger_id={passengerId}
                     ></Notification>
                 ) : (
                     <SearchingPop
