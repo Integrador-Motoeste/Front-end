@@ -42,6 +42,18 @@ export default function Map({onRide}: MapProps) {
 
         socket.onopen = () => {
             setSocket(socket);
+
+            const message = JSON.stringify({
+                type: "update_coords",
+                coords: {
+                    latitude: position.latitude,
+                    longitude: position.longitude
+                },
+                user_type : 'pilot',
+                user_id: 10,
+            });
+
+            socket.send(message)
         }
 
         socket.onmessage = (event: any) => {
@@ -84,6 +96,16 @@ export default function Map({onRide}: MapProps) {
         setSocket(socket);
     }
 
+    const remove_coords = async () => {
+        const message = JSON.stringify({
+            type: "remove_coords",
+            user_id: 10,
+            user_type: 'pilot',
+        });
+
+        await socket.send(message)
+    }
+
     const acceptRide = () => {
         if (socket) {
             const message = JSON.stringify({
@@ -114,6 +136,7 @@ export default function Map({onRide}: MapProps) {
 
     const cancelSearching = () => {
         if (socket) {
+            remove_coords();
             socket.close();
             setIsSearching(false);
             setAwaitingConfirmation(false);
@@ -141,6 +164,7 @@ export default function Map({onRide}: MapProps) {
 
         return () => {
             if (socket) {
+                remove_coords();
                 socket.close();
             }
         };

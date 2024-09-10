@@ -44,6 +44,18 @@ export default function Map({onRide}: mapsProps) {
             socket.onopen = () => {
                 setSocket(socket);
                 resolve(socket); 
+
+                const message = JSON.stringify({
+                    type: "update_coords",
+                    coords: {
+                        latitude: origin.latitude,
+                        longitude: origin.longitude
+                    },
+                    user_type : 'passenger',
+                    user_id: 1,
+                });
+
+                socket.send(message)
             };
     
             socket.onerror = (error) => {
@@ -54,8 +66,10 @@ export default function Map({onRide}: mapsProps) {
             socket.onmessage = (event: any) => {
                 const data = JSON.parse(event.data);
                 if (data.type === 'ride_response') {
-                    setPilotId(data.pilot_id);
-                    setHasPilot(true);
+                    if(hasPilot === false){
+                        setPilotId(data.pilot_id);
+                        setHasPilot(true);
+                    }
                 }
             }
         });
@@ -85,9 +99,20 @@ export default function Map({onRide}: mapsProps) {
             Alert.alert('Erro', 'Não foi possível estabelecer a conexão. Tente novamente.');
         }
     };
+
+    const remove_coords = async () => {
+        const message = JSON.stringify({
+            type: "remove_coords",
+            user_id: 1,
+            user_type: 'passenger',
+        });
+
+        await socket.send(message)
+    }
     
     const cancelRide = () => {
         if (socket) {
+            remove_coords();
             socket.close();
             setIsConfirmed(false);
         }
@@ -148,6 +173,7 @@ export default function Map({onRide}: mapsProps) {
 
         return () => {
             if (socket) {
+                remove_coords();
                 socket.close();
             }
         };
