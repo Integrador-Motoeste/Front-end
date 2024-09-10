@@ -15,9 +15,10 @@ import { measure } from "react-native-reanimated";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
 const temp_origin = {
-    latitude : -6.130435,
-    longitude: -38.4014183,
+    latitude : -6.0882835,
+    longitude: -38.372192,
 }
+
 
 const temp_destination = {
     lat : -6.112170799999999,
@@ -32,17 +33,10 @@ export default function RidePassengerExecution() {
     const [destination, setDestination] = useState<any>(null)
     const mapRef = useRef<any>(null);
 
-    const [distance, setDistance] = useState<string>("");
-    const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number>(0);
     const [pilotCoords, setPilotCoords] = useState<any>(null);
     const [isBoarded, setIsBoarded] = useState(false);
 
     const [socket, setSocket] = useState<any>(null);
-    const [passengerId, setPassengerId] = useState<any>(null);
-    const [hasRide, setHasRide] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
-    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
     // BEGIN SOCKET
 
@@ -55,7 +49,9 @@ export default function RidePassengerExecution() {
 
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
+            console.log(data)
             if (data.type == 'pilot_position'){
+                console.log(data)
                 setPilotCoords({
                     latitude: data.latitude,
                     longitude: data.longitude
@@ -68,6 +64,12 @@ export default function RidePassengerExecution() {
         connectSocket();
         setOrigin(temp_origin);
         setDestination(temp_destination);
+
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
     }, [])
 
     const confirm_boarding = () => {
@@ -83,28 +85,6 @@ export default function RidePassengerExecution() {
 
     //// END SOCKET
 
-    function handleOriginPlaceChange(data:any) {
-        setOrigin({
-            latitude: data.lat,
-            longitude: data.lng
-        })
-    }
-
-    async function requestLocalPermissions() {
-        const { granted } = await requestForegroundPermissionsAsync();
-
-        if (granted) {
-            const currentPosition = await getCurrentPositionAsync();
-            setOrigin({
-                latitude: currentPosition.coords.latitude,
-                longitude: currentPosition.coords.longitude,
-            });
-        }
-    }
-
-    useEffect(() => {
-        requestLocalPermissions();
-    }, [])
 
     useEffect(() => {
         if (origin && destination) {
@@ -115,54 +95,6 @@ export default function RidePassengerExecution() {
             }, 0);
         }
     }, [[origin, destination, pilotCoords]]);
-
-    useEffect(() => {
-        const getTravelTime = async () => {
-            if (origin && destination) {
-                const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.latitude},${origin.longitude}&destinations=${destination.lat},${destination.lng}&language=pt-BR&mode=driving&key=${google_key}`;
-                try {
-                    const response = await fetch(URL);
-                    const data = await response.json();
-                    if (data.rows[0].elements[0].status === "OK") {
-                        setDistance(data.rows[0].elements[0].distance.text);
-
-                        const duration = data.rows[0].elements[0].duration.text
-                        .replace(" horas", "h")
-                        .replace(" hora", "h")
-                        .replace(" minutos", "min")
-                        .replace(" minuto", "min");
-                        setDuration(duration);
-
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
-                    } else {
-                        console.error("Error fetching distance data");
-                    }
-                } catch (error) {
-                    console.error("Error fetching distance data", error);
-                }
-            }
-        };
-    
-        getTravelTime();
-    }, [origin, destination]);
-
-    useEffect(() => {
-        watchPositionAsync(
-            {
-                accuracy: LocationAccuracy.Highest,
-                timeInterval: 1000,
-                distanceInterval: 10,
-            },
-            (location) => {
-                setOrigin({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                });
-            }
-        );
-    }, []);
-    
     
     return (
         <View style={style.container}>

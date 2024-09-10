@@ -53,6 +53,7 @@ export default function Map() {
                     setIsSearching(true);
                     setPassengerId(null);
                 }else if (data.response === true){
+                    router.replace('/(pilot)/ride/tracking')
                 }
             }
             if (data.type == 'passenger_not_found'){

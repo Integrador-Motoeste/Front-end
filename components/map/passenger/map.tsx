@@ -105,6 +105,7 @@ export default function Map() {
             });
             await socket.send(message);
             setHasPilot(false);
+            router.replace('/(passenger)/ride/tracking');
         }
     }
     //// END QUEUE SOCKET

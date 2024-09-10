@@ -19,20 +19,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const segments = useSegments();
-  const router = useRouter();
-  const { id } = useLocalSearchParams();
-  const [indexLink, setIndexLink] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log(segments)
-    if (segments.includes('tracking')) {
-      setIndexLink(`(passenger)/ride/tracking/`);
-    }else{
-      setIndexLink('/');
-    }
-    console.log(indexLink)
-  }, [segments])
 
   return (
     <Tabs
@@ -48,7 +35,7 @@ export default function TabLayout() {
           title: 'Corrida',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
-            <Link href={indexLink} asChild>
+            <Link href="/" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome

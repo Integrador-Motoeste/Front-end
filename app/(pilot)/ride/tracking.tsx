@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { useLocalSearchParams } from "expo-router";
-
+import { measure } from "react-native-reanimated";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -30,19 +30,12 @@ export default function RidePassengerExecution() {
 
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
-    const [position, setPosition] = useState<any>(null)
     const mapRef = useRef<any>(null);
 
-    const [distance, setDistance] = useState<string>("");
-    const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number>(0);
+    const [position, setPosition] = useState<any>(null)
     const [isBoarded, setIsBoarded] = useState(false);
 
     const [socket, setSocket] = useState<any>(null);
-    const [passengerId, setPassengerId] = useState<any>(null);
-    const [hasRide, setHasRide] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
-    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
     // BEGIN SOCKET
 
@@ -51,6 +44,7 @@ export default function RidePassengerExecution() {
 
         socket.onopen = () => {
             setSocket(socket);
+            console.log('Socket connected');
         }
 
         socket.onmessage = (event: any) => {
@@ -61,54 +55,35 @@ export default function RidePassengerExecution() {
         }
     }
 
-    const send_current_position = () => {
+    useEffect(() => {
         if (socket && position) {
             socket.send(JSON.stringify({
                 type: 'change_pilot_position',
                 ride_id: id,
                 latitude: position.latitude,
                 longitude: position.longitude
-            }))
+            }));
         }
-    }
+    }, [position, socket]);
 
     useEffect(() => {
-        connectSocket();
+        connectSocket(); 
         setOrigin(temp_origin);
         setDestination(temp_destination);
-    }, [])
-
-
+    
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
+    }, []); 
 
     //// END SOCKET
-
-    function handleOriginPlaceChange(data:any) {
-        setOrigin({
-            latitude: data.lat,
-            longitude: data.lng
-        })
-    }
-
-    async function requestLocalPermissions() {
-        const { granted } = await requestForegroundPermissionsAsync();
-
-        if (granted) {
-            const currentPosition = await getCurrentPositionAsync();
-            setPosition({
-                latitude: currentPosition.coords.latitude,
-                longitude: currentPosition.coords.longitude,
-            });
-        }
-    }
-
-    useEffect(() => {
-        requestLocalPermissions();
-    }, [])
 
     useEffect(() => {
         if (origin && destination && position) {
             setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination", "position"], {
+                mapRef.current.fitToSuppliedMarkers(["origin", "destination", "pilot"], {
                     edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 });
             }, 0);
@@ -116,54 +91,24 @@ export default function RidePassengerExecution() {
     }, [[origin, destination, position]]);
 
     useEffect(() => {
-        const getTravelTime = async () => {
-            if (origin && destination) {
-                const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.latitude},${origin.longitude}&destinations=${destination.lat},${destination.lng}&language=pt-BR&mode=driving&key=${google_key}`;
-                try {
-                    const response = await fetch(URL);
-                    const data = await response.json();
-                    if (data.rows[0].elements[0].status === "OK") {
-                        setDistance(data.rows[0].elements[0].distance.text);
-
-                        const duration = data.rows[0].elements[0].duration.text
-                        .replace(" horas", "h")
-                        .replace(" hora", "h")
-                        .replace(" minutos", "min")
-                        .replace(" minuto", "min");
-                        setDuration(duration);
-
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
-                    } else {
-                        console.error("Error fetching distance data");
-                    }
-                } catch (error) {
-                    console.error("Error fetching distance data", error);
+        const watchPosition = async () => {
+            await watchPositionAsync(
+                {
+                    accuracy: LocationAccuracy.Highest,
+                    timeInterval: 5000,
+                    distanceInterval: 10,
+                },
+                (location) => {
+                    const newPosition = {
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                    };
+                    setPosition(newPosition); 
                 }
-            }
+            );
         };
-    
-        getTravelTime();
-    }, [origin, destination]);
-
-    useEffect(() => {
-        watchPositionAsync(
-            {
-                accuracy: LocationAccuracy.Highest,
-                timeInterval: 5000,
-                distanceInterval: 10,
-            },
-            (location) => {
-                if (position.latitude !== location.coords.latitude && position.longitude !== location.coords.longitude) {
-                    send_current_position();
-                }
-                setPosition({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                });
-            }
-        );
-    }, []);
+        watchPosition();
+    }, []); 
     
     
     return (
@@ -179,7 +124,6 @@ export default function RidePassengerExecution() {
                             latitudeDelta: 0.0922,
                             longitudeDelta: 0.0421,
                         }}
-                        accessibilityElementsHidden={true}
                     >
                         <Marker
                             coordinate={{
@@ -200,15 +144,14 @@ export default function RidePassengerExecution() {
                                 pinColor="#1FD87F"
                             ></Marker>
                         )}
-
                         {position && (
                             <Marker
                                 coordinate={{
                                     latitude: position.latitude,
                                     longitude: position.longitude,
                                 }}
-                                identifier="position"
-                                title="Sua localização"
+                                identifier="pilot"
+                                title="Localização Atual"
                                 pinColor="#F0E822"
                             ></Marker>
                         )}
@@ -247,8 +190,6 @@ export default function RidePassengerExecution() {
                     </MapView>
                 </View>
             )}
-
-
         </View>
     );
 }
