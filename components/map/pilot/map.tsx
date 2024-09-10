@@ -13,8 +13,11 @@ import { router } from "expo-router";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
+interface MapProps {
+    onRide: () => void;
+}
 
-export default function Map() {
+export default function Map({onRide}: MapProps) {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const mapRef = useRef<any>(null);
@@ -53,7 +56,7 @@ export default function Map() {
                     setIsSearching(true);
                     setPassengerId(null);
                 }else if (data.response === true){
-                    router.replace('/(pilot)/ride/tracking')
+                    onRide();
                 }
             }
             if (data.type == 'passenger_not_found'){

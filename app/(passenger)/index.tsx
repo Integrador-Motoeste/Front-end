@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Text, View } from '@/components/Themed';
 import Map from '@/components/map/passenger/map';
+import RidePassengerExecution from '@/components/map/ridePassenger/tracking';
+
 
 export default function TabOneScreen() {
+  const [hasRide, setHasRide] = useState(false);
+
+  const onRideRequest = () => {
+    setHasRide(true);
+  }
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto"/>
-      <Map></Map>
+      { hasRide ? (
+        //Passar corrida ativa por props
+        <RidePassengerExecution></RidePassengerExecution>
+      ):(
+        <Map onRide={() => onRideRequest()}></Map>
+      )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});

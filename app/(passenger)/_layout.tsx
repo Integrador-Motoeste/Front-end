@@ -64,12 +64,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ride/tracking"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="ridehistory/index"
         options={{
           title: 'Histórico',

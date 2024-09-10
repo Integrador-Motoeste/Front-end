@@ -25,7 +25,7 @@ const temp_destination = {
 }
 
 
-export default function RidePassengerExecution() {
+export default function RidePilotExecution() {
     const [id, setId] = useState<any>(5);
 
     const [origin, setOrigin] = useState<any>(null)

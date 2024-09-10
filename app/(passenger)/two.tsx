@@ -1,34 +1,25 @@
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
-import { Alert, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
 import Map from '@/components/map/pilot/map';
-
+import RidePilotExecution from '@/components/map/ridePilot/tracking';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 export default function TabTwoScreen() {
+  const [hasRide, setHasRide] = useState(false);
+
+  const onRideRequest = () => {
+    setHasRide(true);
+  }
 
   return (
-    <Map>
-    </Map>
+    <SafeAreaView style={{flex: 1}}>
+      <StatusBar style="auto"/>
+      { hasRide ? (
+        <RidePilotExecution></RidePilotExecution>
+      ):(
+        <Map onRide={() => onRideRequest()}></Map>
+      )}
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});

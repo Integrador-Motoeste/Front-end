@@ -16,8 +16,11 @@ import { PassengerNotification } from "@/components/notifications/passengerConfi
 import { router } from "expo-router";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
+interface mapsProps {
+    onRide : () => void;
+}
 
-export default function Map() {
+export default function Map({onRide}: mapsProps) {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const [isTypingOrigin, setIsTypingOrigin] = useState(false);
@@ -105,7 +108,7 @@ export default function Map() {
             });
             await socket.send(message);
             setHasPilot(false);
-            router.replace('/(passenger)/ride/tracking');
+            onRide();
         }
     }
     //// END QUEUE SOCKET

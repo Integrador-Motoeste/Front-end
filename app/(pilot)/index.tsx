@@ -1,29 +1,26 @@
-import { StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { Text, View } from '@/components/Themed';
-import Map from '@/components/map/pilot/map';
 import { useState } from 'react';
-import { router } from 'expo-router';
+import Map from '@/components/map/pilot/map';
+import RidePilotExecution from '@/components/map/ridePilot/tracking';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
-export default function TabOneScreen() {
+export default function TabTwoScreen() {
+  const [hasRide, setHasRide] = useState(false);
 
+  const onRideRequest = () => {
+    setHasRide(true);
+  }
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto"/>
-      <Map></Map>
+      { hasRide ? (
+        //Passar corrida ativa por props
+        <RidePilotExecution></RidePilotExecution>
+      ):(
+        <Map onRide={() => onRideRequest()}></Map>
+      )}
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
