@@ -21,7 +21,7 @@ const temp_origin = {
 
 const temp_destination = {
     lat : -6.112170799999999,
-    lng: -38.3067149,
+    lng: -39.3067149,
 }
 
 
@@ -82,11 +82,20 @@ export default function RidePassengerExecution() {
 
     useEffect(() => {
         if (origin && destination && position) {
-            setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination", "pilot"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
-            }, 0);
+            console.log(isBoarded)
+            if(isBoarded){
+                setTimeout(() => {
+                    mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }, 0);
+            }else{
+                setTimeout(() => {
+                    mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }, 0);
+            }
         }
     }, [[origin, destination, position]]);
 

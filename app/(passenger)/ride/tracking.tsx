@@ -49,9 +49,7 @@ export default function RidePassengerExecution() {
 
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
-            console.log(data)
             if (data.type == 'pilot_position'){
-                console.log(data)
                 setPilotCoords({
                     latitude: data.latitude,
                     longitude: data.longitude
@@ -87,12 +85,20 @@ export default function RidePassengerExecution() {
 
 
     useEffect(() => {
-        if (origin && destination) {
-            setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination", "pilot"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
-            }, 0);
+        if (origin && destination && pilotCoords) {
+            if(isBoarded){
+                setTimeout(() => {
+                    mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }, 0);
+            }else{
+                setTimeout(() => {
+                    mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }, 0);
+            }
         }
     }, [[origin, destination, pilotCoords]]);
     
