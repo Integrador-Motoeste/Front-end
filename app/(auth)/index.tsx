@@ -39,10 +39,17 @@ export default function AppLogin() {
         }
 
         router.replace("/(public)");
+      } else if (oAuthFlow.authSessionResult?.type === "cancel") {
+        console.log('Erro ao logar com Google');
+        setIsLoading(false);
+        router.replace("/(auth)");
+
       } else {
         console.log('Erro ao logar com Google');
         setIsLoading(false);
+        router.replace("/(auth)");
       }
+
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -62,6 +69,7 @@ export default function AppLogin() {
         email: user?.emailAddresses[0].emailAddress,
         first_name: user?.firstName,
         last_name: user?.lastName,
+        id_clerk_user: user?.id,
       };
       
       console.log(userInfo);

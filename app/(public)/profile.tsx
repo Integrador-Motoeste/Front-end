@@ -9,6 +9,7 @@ import BigTextContent from '@/components/bigTextContent';
 import InfoMotorcycle from '@/components/infoMotorcycle';
 import { useUser } from '@clerk/clerk-expo';
 import ExitButton from '@/components/exitButton';
+import { tokenCache } from '../storage/toekCache';
 
 export default function Profile() {
   const { isSignedIn, user } = useUser();
@@ -16,6 +17,14 @@ export default function Profile() {
   if(!isSignedIn) {
     return null;
   } 
+  
+  console.log(user.publicMetadata);
+  
+  const baseURL = 'http://192.168.0.16:8000';
+
+  const profileImageUrl = user?.publicMetadata.image_url
+    ? `${baseURL}${user.publicMetadata.image_url}`
+    : user.imageUrl;
 
   return (
     <Container>
@@ -27,7 +36,7 @@ export default function Profile() {
         
         <ProfileSection>
           <ProfileImageContainer>
-            <ProfileImage source={{ uri: user?.imageUrl }}/>
+            <ProfileImage source={{ uri: profileImageUrl }}/>
           </ProfileImageContainer>
           
           <ProfileInfo>
@@ -42,10 +51,9 @@ export default function Profile() {
           <BigTextContent label='Saldo' text='R$ 12,00'/>
 
         <InfoGrid>
-          <SmallTextContent label='Telefone' text={user.phoneNumbers && user.phoneNumbers.length > 0 ? user.phoneNumbers[0].phoneNumber : 'Nenhum'}/>
-          <SmallTextContent label='CPF' text='123.456.789-10'/>
+          <SmallTextContent label='CPF' text={user.publicMetadata.cpf as string}/>
+          <SmallTextContent label='CNH' text={user.publicMetadata.cnh as string}/> 
           <SmallTextContent label='Email' text={user.emailAddresses[0].emailAddress}/>
-          <SmallTextContent label='CNH' text='66602962477'/> 
         </InfoGrid>
 
         <VehicleCard>
