@@ -20,7 +20,7 @@ export default function Profile() {
     return null;
   } 
   
-  console.log(user.publicMetadata);
+  console.log("user public" + user.publicMetadata);
   
   const baseURL = 'http://192.168.0.16:8000';
 

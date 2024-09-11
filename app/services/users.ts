@@ -18,7 +18,7 @@ export default class UserService {
     }
 
     async createUser(data: createUser){
-        const url = `${this.baseUrl}create_user/`
+        const url = `${this.baseUrl}/create_user/`
         try{
             const response = await this.axiosClient.post(url, data, {
                 headers: {}
@@ -26,7 +26,7 @@ export default class UserService {
             return response
         }catch (error: any){
             console.error("Error creating user");
-            return error.response;
+            
         }
     }
 

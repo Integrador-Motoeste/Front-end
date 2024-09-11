@@ -22,7 +22,6 @@ function InitialLayout() {
     if (!isSignedIn) {
       router.replace("/(auth)"); 
     } else {
-
       console.log("user public metadata ", user.publicMetadata);
       const groups = user.publicMetadata?.groups as string[] | undefined;
       if (groups && groups.includes('Pilots')) {
@@ -30,8 +29,7 @@ function InitialLayout() {
       } else if (groups && groups.includes('Passengers')) {
         router.replace("/(passenger)"); 
       } else {
-        signOut();
-        router.replace("/(auth)"); 
+        router.replace("/"); 
       }
     }
   }, [isSignedIn, isLoaded]);

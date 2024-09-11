@@ -10,34 +10,28 @@ import ButtonOutLine from '@/components/ButtonOutLine';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
-import { useOAuth, useUser } from '@clerk/clerk-expo';
+import { useSignIn , useClerk, useOAuth, useUser } from '@clerk/clerk-expo';
 import * as Linking from 'expo-linking';
-import axios from 'axios';
+import React from 'react';
 import PasswordInput from '@/components/PasswordInput';
-import UserService, {createUser} from '../services/users'; '@/app/services/users';
+import axios from 'axios';
 
-
-// Ensure PasswordInput returns a valid JSX element
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function AppLogin() {
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
   const router = useRouter();
-  const { user, isLoaded, isSignedIn } = useUser();
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  function handleLogin() {
-    router.push("/");
-  }
-
+  const { signOut } = useClerk();
+  const { user , isSignedIn } = useUser();
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
+  const { signIn, setActive, isLoaded } = useSignIn();
 
   async function GoogleSignIn() {
     try {
-      setIsLoading(true);
+      setIsLoadingButton(true);
       const redirectUrl = Linking.createURL("/");
       const oAuthFlow = await startOAuthFlow({ redirectUrl });
 
@@ -45,23 +39,18 @@ export default function AppLogin() {
         if (oAuthFlow.setActive) {
           await oAuthFlow.setActive({ session: oAuthFlow.createdSessionId });
         }
-        
-        router.replace("/");
-
-      } else if (oAuthFlow.authSessionResult?.type === "cancel") {
-        console.log('Erro ao logar com Google');
-        setIsLoading(false);
-        router.replace("/(auth)");
+        router.replace("/redirect");
 
       } else {
         console.log('Erro ao logar com Google');
-        setIsLoading(false);
+        setIsLoadingButton(false);
         router.replace("/(auth)");
       }
 
     } catch (error) {
       console.log(error);
-      setIsLoading(false);
+      signOut()
+      setIsLoadingButton(false);
     }
   }
 
@@ -70,35 +59,51 @@ export default function AppLogin() {
 
     if (!isLoaded) {
       console.log('Usuário não carregado');
-      setIsLoading(false);
+      setIsLoadingButton(false);
       return;
-    } 
+    } else{
 
-    if (!isSignedIn){
-      return;
-    } else {
-      
       const userInfo = {
-        email: user?.emailAddresses[0].emailAddress as string,
-        first_name: user?.firstName as string,
-        last_name: user?.lastName as string,
-        id_clerk_user: user?.id as string,
+        email: user?.emailAddresses[0].emailAddress,
+        first_name: user?.firstName,
+        last_name: user?.lastName,
+        id_clerk_user: user?.id,
       };
       
-      async function createUser() {
-        const userService = new UserService("");
-        const response = await userService.createUser(userInfo);
-      }
-    
-      createUser();
+      console.log(userInfo);
+      axios.post('http://192.168.0.16:8000/api/users/users/create_user/', userInfo);
+
     }
 
     return () => {
       WebBrowser.coolDownAsync();
     };
 
-    
-  }, [GoogleSignIn]);
+  }, [isLoaded, isSignedIn]);
+
+  const onSignInPress = React.useCallback(async () => {
+    if (!isLoaded) {
+      return
+    }
+
+    try {
+      const signInAttempt = await signIn.create({
+        identifier: emailAddress,
+        password,
+      })
+
+      if (signInAttempt.status === 'complete') {
+        await setActive({ session: signInAttempt.createdSessionId })
+        router.replace('/redirect')
+      } else {
+        // See https://clerk.com/docs/custom-flows/error-handling
+        // for more info on error handling
+        console.error(JSON.stringify(signInAttempt, null, 2))
+      }
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2))
+    }
+  }, [isLoaded, emailAddress, password])
 
   return (
     <Container>
@@ -117,13 +122,12 @@ export default function AppLogin() {
           placeholder="Email"
           onChangeText={(email: string) => setEmailAddress(email)}
         />
-        <PasswordInput password={password} setPassword={setPassword}>
-        </PasswordInput>
+        <PasswordInput password={password} setPassword={setPassword} />
 
         <ContainerButtons>
-          <Button title="Entrar" onPress={handleLogin} />
+          <Button title="Entrar" onPress={onSignInPress} />
           <ButtonOutLine
-            isLoading={isLoading}
+            isLoading={isLoadingButton}
             onPress={GoogleSignIn}
             icon="logo-google"
             title="Entrar com o Google"
