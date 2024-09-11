@@ -1,66 +1,46 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Link, router, Slot } from "expo-router"
+import { styled } from "styled-components/native"
+import ProfileIconMenu from "@/assets/SVG/profile-icon-menu"
+import ListRidescIcon from "@/assets/SVG/listRides-icon-menu"
+import MainIcon from "@/assets/SVG/main-icon-menu"
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+export default function LayoutPublic(){
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+    return(
+        <>
+            <Slot/>
+            <MenuContainer>
+                <MenuItem onPress={() => router.push("/(public)")}>
+                        <ListRidescIcon/>
+                </MenuItem>
+                <MenuItem onPress={() => router.push("/(pilot)")}>
+                        <MainIcon/>
+                </MenuItem>
+                <MenuItem onPress={() => router.push("/(pilot)/profile")}>
+                        <ProfileIconMenu/>
+                </MenuItem>
+            </MenuContainer>
+        </>
+    )
 }
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const MenuContainer = styled.View`
+    background-color: #1FD87F;
+    height: 73px;
+    width: 90%;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 30px;
+    align-items: center;
+    justify-content: space-evenly;
+    position: absolute;
+    bottom: 2%;
+    left: 5%;
+`
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Corrida',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/(pilot)" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="payments/payment"
-        options={{
-          title: 'Pagamento',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
-}
+const MenuItem = styled.TouchableOpacity`
+    height: 32px;
+    width: auto;
+`

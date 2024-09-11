@@ -1,5 +1,7 @@
 import HelmetMain from '@/assets/SVG/helmet-main';
-import { Container, Header, Logo, MainLogin, Title, ContainerButtons, SignUpContent, ContainerSignUpText, SubTitle, TitleSignUp } from './style';
+import { Container, Header, Logo, MainLogin, Title, 
+  ContainerButtons, SignUpContent, ContainerSignUpText, 
+  SubTitle, TitleSignUp } from './style';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
 import Input from '@/components/Input';
@@ -11,6 +13,9 @@ import { Link, useRouter } from 'expo-router';
 import { useOAuth, useUser } from '@clerk/clerk-expo';
 import * as Linking from 'expo-linking';
 import axios from 'axios';
+import PasswordInput from '@/components/PasswordInput';
+
+// Ensure PasswordInput returns a valid JSX element
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,6 +25,7 @@ export default function AppLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function handleLogin() {
     router.push("/(public)");
@@ -100,12 +106,9 @@ export default function AppLogin() {
           placeholder="Email"
           onChangeText={(email: string) => setEmailAddress(email)}
         />
-        <Input
-          value={password}
-          placeholder="Senha"
-          secureTextEntry={true}
-          onChangeText={(password: string) => setPassword(password)}
-        />
+        <PasswordInput password={password} setPassword={setPassword}>
+        </PasswordInput>
+
         <ContainerButtons>
           <Button title="Entrar" onPress={handleLogin} />
           <ButtonOutLine

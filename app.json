@@ -37,7 +37,8 @@
             "node_modules/@expo-google-fonts/inter/Inter_500Medium.ttf"
           ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
