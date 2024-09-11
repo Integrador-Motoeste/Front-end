@@ -11,6 +11,7 @@ import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
+import { router } from "expo-router";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 
@@ -54,6 +55,13 @@ export default function RidePassengerExecution() {
                     latitude: data.latitude,
                     longitude: data.longitude
                 });
+            }
+        }
+
+        socket.onmessage = (event: any) => {
+            const data = JSON.parse(event.data);
+            if (data.type == 'finish_ride'){
+                router.replace('/(passenger)/payments/5')
             }
         }
     }

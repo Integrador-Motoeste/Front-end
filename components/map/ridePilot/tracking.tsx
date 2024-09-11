@@ -9,7 +9,7 @@ import { Notification } from "@/components/notifications/notification";
 import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
@@ -98,6 +98,19 @@ export default function RidePilotExecution() {
             }
         }
     }, [[origin, destination, position]]);
+
+    const finishRide = async () => {
+        if (socket){
+            socket.send(JSON.stringify({
+                type: 'finish_ride',
+                ride_id: id,
+            }));
+
+            //atualiza o estado da corrida
+
+            router.replace('/(pilot)/payments/5');
+        }
+    }
 
     useEffect(() => {
         const watchPosition = async () => {
@@ -199,6 +212,8 @@ export default function RidePilotExecution() {
                     </MapView>
                 </View>
             )}
+
+        <Button onPress={finishRide} title="Finalizar"></Button>
         </View>
     );
 }

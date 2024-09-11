@@ -6,7 +6,7 @@ import RidePassengerExecution from '@/components/map/ridePassenger/tracking';
 
 
 export default function TabOneScreen() {
-  const [hasRide, setHasRide] = useState(false);
+  const [hasRide, setHasRide] = useState(true);
 
   const onRideRequest = () => {
     setHasRide(true);

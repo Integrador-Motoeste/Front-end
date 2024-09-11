@@ -14,13 +14,35 @@ import CopyPastIcon from "@/assets/SVG/copypaste";
 import Spinner from "@/components/spinnig";
 import CheckIcon from "@/assets/SVG/check";
 import axios from "axios";
+import { useLocalSearchParams } from "expo-router";
+import { measure } from "react-native-reanimated";
+import Button from "@/components/Button";
 
-export default function RideHistory (){
-    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1NDAzODIzLCJpYXQiOjE3MjU0MDI5MjMsImp0aSI6IjhiNjk0MTRkYzNlNzRjN2NhZDk1ODM1MTkxZjExODYxIiwidXNlcl9pZCI6MX0.L13wot-aufYCUfw6Skb4fDMnQsbV6wzM5_hAtdPnIns")
+export default function PaymentPilot (){
+    const { id } = useLocalSearchParams()
+    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()	
     const [isLoading, setIsLoafing] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+
+
+    const connectSocket = () => {
+        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+
+        socket.onopen = () => {
+            setSocket(socket);
+        }
+    }
+
+    const sendConfirmation = async () => {
+        const message = JSON.stringify({
+            type: 'confirmation',
+            ride_id: id,
+        })
+        await socket?.send(message)
+    }
 
     // Pega a fatura da corrida
     async function updateInvoice(){
@@ -48,6 +70,7 @@ export default function RideHistory (){
     };
 
     useEffect(() => {
+        connectSocket()
         updateInvoice()
         get_qrcode()
     },[])
@@ -89,6 +112,7 @@ export default function RideHistory (){
                             />
                         )
                     }
+                <Button onPress={sendConfirmation} title="Confirmar pagamento"/>
                 </Container>
                 )}
         </SafeAreaView>

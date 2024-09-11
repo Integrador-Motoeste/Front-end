@@ -58,7 +58,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments/payment"
+        name="payments/[id]"
         options={{
           href: null,
         }}
