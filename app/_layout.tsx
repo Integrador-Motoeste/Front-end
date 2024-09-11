@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold ,InterTight_600SemiBold, Inter_900Black, InterTight_300Light, Inter_700Bold } from '@expo-google-fonts/dev';
-import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-expo';
+import { ClerkProvider, useAuth, useUser, useClerk } from '@clerk/clerk-expo';
 import { Slot, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { tokenCache } from './storage/toekCache';
@@ -12,24 +12,27 @@ function InitialLayout() {
   const { isLoaded } = useAuth();
   const router = useRouter();
   const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
   useEffect(() => {
     if (!isLoaded) {
       return;
     }
 
-    if(!isSignedIn) {
+    if (!isSignedIn) {
       router.replace("/(auth)"); 
-    } 
-    
-    if (isSignedIn) {
-      if ((user.publicMetadata.groups as string[]).includes('Pilots')) {
-        router.replace("/(pilot)"); 
-      } else if ((user.publicMetadata.groups as string[]).includes('Passengers')) {
-        router.replace("/(passenger)"); 
-    }
     } else {
-      router.replace("/(auth)"); 
+
+      console.log("user public metadata ", user.publicMetadata);
+      const groups = user.publicMetadata?.groups as string[] | undefined;
+      if (groups && groups.includes('Pilots')) {
+        router.replace("/(pilot)"); 
+      } else if (groups && groups.includes('Passengers')) {
+        router.replace("/(passenger)"); 
+      } else {
+        signOut();
+        router.replace("/(auth)"); 
+      }
     }
   }, [isSignedIn, isLoaded]);
 

@@ -10,7 +10,7 @@ export default function LayoutPublic(){
         <>
             <Slot/>
             <MenuContainer>
-                <MenuItem onPress={() => router.push("/(public)")}>
+                <MenuItem onPress={() => router.push("/(pilot)")}>
                         <ListRidescIcon/>
                 </MenuItem>
                 <MenuItem onPress={() => router.push("/(pilot)")}>

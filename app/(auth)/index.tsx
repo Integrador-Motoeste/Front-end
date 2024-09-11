@@ -14,6 +14,8 @@ import { useOAuth, useUser } from '@clerk/clerk-expo';
 import * as Linking from 'expo-linking';
 import axios from 'axios';
 import PasswordInput from '@/components/PasswordInput';
+import UserService, {createUser} from '../services/users'; '@/app/services/users';
+
 
 // Ensure PasswordInput returns a valid JSX element
 
@@ -24,11 +26,11 @@ export default function AppLogin() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function handleLogin() {
-    router.push("/(public)");
+    router.push("/");
   }
 
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
@@ -43,8 +45,9 @@ export default function AppLogin() {
         if (oAuthFlow.setActive) {
           await oAuthFlow.setActive({ session: oAuthFlow.createdSessionId });
         }
+        
+        router.replace("/");
 
-        router.replace("/(public)");
       } else if (oAuthFlow.authSessionResult?.type === "cancel") {
         console.log('Erro ao logar com Google');
         setIsLoading(false);
@@ -69,24 +72,32 @@ export default function AppLogin() {
       console.log('Usuário não carregado');
       setIsLoading(false);
       return;
-    } else{
+    } 
 
+    if (!isSignedIn){
+      return;
+    } else {
+      
       const userInfo = {
-        email: user?.emailAddresses[0].emailAddress,
-        first_name: user?.firstName,
-        last_name: user?.lastName,
-        id_clerk_user: user?.id,
+        email: user?.emailAddresses[0].emailAddress as string,
+        first_name: user?.firstName as string,
+        last_name: user?.lastName as string,
+        id_clerk_user: user?.id as string,
       };
       
-      console.log(userInfo);
-      axios.post('http://192.168.0.16:8000/api/users/users/create_or_update_user/', userInfo);
-
+      async function createUser() {
+        const userService = new UserService("");
+        const response = await userService.createUser(userInfo);
+      }
+    
+      createUser();
     }
-
 
     return () => {
       WebBrowser.coolDownAsync();
     };
+
+    
   }, [GoogleSignIn]);
 
   return (

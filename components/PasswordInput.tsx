@@ -9,9 +9,10 @@ interface PasswordInputProps {
   setPassword: (password: string) => void;
   width?: string;
   height?: string;
+  outline?: boolean;
 }
 
-export default function PasswordInput({ password, setPassword, width, height }: PasswordInputProps) {
+export default function PasswordInput({ password, setPassword, width, height}: PasswordInputProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
@@ -45,6 +46,7 @@ const PasswordContainer = styled.View<PasswordInputProps>`
   font-size: 16px;
   font-family: 'Inter_500Medium';
   color: '#1FD87F';
+  border: ${({ outline }) => (outline ? '2px solid #1FD87F' : 'none')};
 `;
 
 const StyledInput = styled.TextInput`

@@ -6,6 +6,7 @@ interface InputProps extends TextInputProps {
   value?: string;
   width?: string;
   height?: string;
+  outline?: boolean;
   }
 
 export default function Input({ placeholder, value, ...rest }: InputProps) {
@@ -27,4 +28,5 @@ const TextInput = styled.TextInput<InputProps>`
   font-size: 16px;
   font-family: "Inter_500Medium";
   color: '#1FD87F';
+  border: ${({ outline }) => outline ? '2px solid #1FD87F' : 'none'};
   `;
