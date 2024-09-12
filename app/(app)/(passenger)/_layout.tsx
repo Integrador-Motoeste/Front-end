@@ -65,7 +65,7 @@ export default function TabLayout() {
         }}
         />
       <Tabs.Screen
-        name="payments/[id]"
+        name="profile"
         options={{
           href: null,
         }}
