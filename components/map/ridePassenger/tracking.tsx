@@ -14,6 +14,8 @@ import { measure } from "react-native-reanimated";
 import { router } from "expo-router";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
 
 const temp_origin = {
     latitude : -6.0882835,
@@ -42,26 +44,21 @@ export default function RidePassengerExecution() {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/rides/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
         }
-
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
+            if (data.type == 'finish_ride'){
+                router.replace('/(passenger)/payments/5')
+            }
             if (data.type == 'pilot_position'){
                 setPilotCoords({
                     latitude: data.latitude,
                     longitude: data.longitude
                 });
-            }
-        }
-
-        socket.onmessage = (event: any) => {
-            const data = JSON.parse(event.data);
-            if (data.type == 'finish_ride'){
-                router.replace('/(passenger)/payments/5')
             }
         }
     }

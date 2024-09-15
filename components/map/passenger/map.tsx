@@ -15,6 +15,7 @@ import { to_br_real } from "@/components/utils/to-real";
 import { PassengerNotification } from "@/components/notifications/passengerConfirm";
 import { router } from "expo-router";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 interface mapsProps {
     onRide : () => void;
@@ -39,7 +40,7 @@ export default function Map({onRide}: mapsProps) {
     // BEGIN QUEUE SOCKET
     const connectSocket = async () => {
         return new Promise((resolve, reject) => {
-            const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/1/passenger/`);
+            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/1/passenger/`);
     
             socket.onopen = () => {
                 setSocket(socket);

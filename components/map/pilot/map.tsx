@@ -12,6 +12,8 @@ import Button from "@/components/Button";
 import { router } from "expo-router";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
 
 interface MapProps {
     onRide: () => void;
@@ -38,7 +40,7 @@ export default function Map({onRide}: MapProps) {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides_queue/10/pilot/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/10/pilot/`)
 
         socket.onopen = () => {
             setSocket(socket);

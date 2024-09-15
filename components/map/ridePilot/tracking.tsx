@@ -13,6 +13,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
 
 const temp_origin = {
     latitude : -6.0882835,
@@ -40,11 +42,10 @@ export default function RidePilotExecution() {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/rides/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/rides/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
-            console.log('Socket connected');
         }
 
         socket.onmessage = (event: any) => {
@@ -82,7 +83,6 @@ export default function RidePilotExecution() {
 
     useEffect(() => {
         if (origin && destination && position) {
-            console.log(isBoarded)
             if(isBoarded){
                 setTimeout(() => {
                     mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
