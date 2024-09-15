@@ -30,7 +30,9 @@ const Text = Styled.Text<{ fontColor: string, fontSize: string }>`
   font-family: "Inter_600SemiBold";
 `;
 
-const ButtonDefault = Styled.TouchableOpacity<{ buttonColor: string, buttonWidth: string, buttonHeight: string, margin: string }>`
+const ButtonDefault = Styled.TouchableOpacity.attrs((props) => ({
+  onPress: props.onPress
+}))<{ buttonColor: string, buttonWidth: string, buttonHeight: string, margin: string }>`
   border-radius: 47px;
   margin: ${(props) => props.margin};
   width: ${(props) => props.buttonWidth};

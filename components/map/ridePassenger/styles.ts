@@ -6,12 +6,12 @@ export const style = StyleSheet.create({
         alignItems: "center",
     },
     map: {
-        ...StyleSheet.absoluteFillObject,
         width: "100%",
         height: "100%",
         borderBottomRightRadius: 25,
         position: "relative",
         zIndex: -1,
+        ...StyleSheet.absoluteFillObject,
     },
     mapContainer: {
         width: '100%',

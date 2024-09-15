@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, SplashScreen, Tabs } from 'expo-router';
+import { Link, SplashScreen, Tabs, useSegments, useRouter, useLocalSearchParams } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
-
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -59,9 +58,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments/payment"
+        name="payments/[id]"
         options={{
-          title: 'Pagamento',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="ridehistory/index"
+        options={{
+          title: 'Histórico',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />

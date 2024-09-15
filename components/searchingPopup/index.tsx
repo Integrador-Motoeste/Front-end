@@ -6,11 +6,12 @@ import Button from '../Button';
 
 interface SearchingPilotsPopupProps {
   visible: boolean;
-  onCancel: () => void;
+  onCancel?: () => void;
   message: string;
+  hasButton?: boolean;
 }
 
-export const SearchingPop: React.FC<SearchingPilotsPopupProps> = ({ message, visible, onCancel }) => {
+export const SearchingPop: React.FC<SearchingPilotsPopupProps> = ({ message, visible, onCancel, hasButton = true }: SearchingPilotsPopupProps) => {
   return (
     <Modal
       animationType="slide"
@@ -22,16 +23,18 @@ export const SearchingPop: React.FC<SearchingPilotsPopupProps> = ({ message, vis
         <View style={style.modalView}>
           <Text style={style.modalText}>{message}</Text>
           <Spinner color="black" size="large" />
-          <Button 
-            title="Cancelar" 
-            onPress={onCancel} 
-            buttonColor="#D81F1F"
-            fontColor="white"
-            buttonWidth="50%"
-            buttonHeight="35px"
-            fontSize="16px"
-            margin="10px"
-          />
+          {hasButton &&
+            <Button 
+              title="Cancelar" 
+              onPress={onCancel} 
+              buttonColor="#D81F1F"
+              fontColor="white"
+              buttonWidth="50%"
+              buttonHeight="35px"
+              fontSize="16px"
+              margin="10px"
+            />
+          }
         </View>
       </View>
     </Modal>

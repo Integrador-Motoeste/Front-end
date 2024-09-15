@@ -6,7 +6,6 @@ export const Container = Styled.View`
     height: 50%;
     padding: 20px;
 
-    position: absolute;
     top: 25%;
     bottom: 50%;
 
@@ -18,7 +17,6 @@ export const Container = Styled.View`
 
     elevation: 20;
     border-radius: 15px;
-    z-index: 1;
 `;
 
 
@@ -66,7 +64,7 @@ export const ProfileContainer = Styled.View`
     height: "fit-content";
     elevation: 20;
     padding: 10px;
-    padding-top: 14px;
+    margin: 12px;
     border-radius: 10px;
     background-color: white;
     position: relative;
@@ -78,7 +76,6 @@ export const ProfileInfoContainer = Styled.View`
     alignItems: center;
     gap: 8px;
     flex: 1;
-    margin-top: 5px ;
 `;
 
 export const ProfileImg = Styled.Image`
@@ -126,4 +123,28 @@ export const ButtonContainer = Styled.View`
     flexDirection: row;
     width: 100%;
     margin: 8px;
+`;
+
+
+export const ModalContainer = Styled.View`
+    flex: 1;
+    justifyContent: center;
+    alignItems: center;
+    backgroundColor: rgba(0, 0, 0, 0.5);
+`;
+
+
+export const ModalContent = Styled.View`
+    width: 75%;
+    min-height: 50%;
+    padding: 20px;
+
+    display: flex;
+    flexDirection: column;
+    align-items: center;
+    justifyContent: space-between;
+    background-color: white;
+
+    elevation: 20;
+    border-radius: 15px;
 `;

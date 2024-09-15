@@ -13,13 +13,31 @@ import { to_br_real } from "@/components/utils/to-real";
 import CopyPastIcon from "@/assets/SVG/copypaste";
 import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
+import { useLocalSearchParams } from "expo-router";
 
-export default function RideHistory (){
-    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1NDA0NDA0LCJpYXQiOjE3MjU0MDM1MDQsImp0aSI6IjA0ZjUzM2EyNGE5MzQwYjFhYzRiMjhmN2M3YjQzZDFlIiwidXNlcl9pZCI6MX0.yW3fwkgfX4_27yict-BdQS9nZIyazEMYs_06DkuLEUA")
+export default function PaymentPassenger(){
+    const { id } = useLocalSearchParams()
+    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()
     const [isLoading, setIsLoafing] = useState<boolean>(false)
-    const [isFinished, setIsFinished] = useState<boolean>(true)	
+    const [isFinished, setIsFinished] = useState<boolean>(false)	
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    const connectSocket = () => {
+        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+
+        socket.onopen = () => {
+            setSocket(socket);
+        }
+
+        socket.onmessage = (event: any) => {
+            const data = JSON.parse(event.data);
+            if (data.type == 'confirmation'){
+                setIsFinished(true);
+            }
+        }
+    }
 
     // Pega a fatura da corrida
     async function updateInvoice(){
@@ -47,6 +65,7 @@ export default function RideHistory (){
     };
 
     useEffect(() => {
+        connectSocket()
         updateInvoice()
         get_qrcode()
     },[])

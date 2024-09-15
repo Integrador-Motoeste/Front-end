@@ -1,20 +1,29 @@
-import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Vibration } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
 import { style } from "./styles";
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
-import { Notification } from "@/components/notification";
+import { Notification } from "@/components/notifications/notification";
+import { io } from "socket.io-client";
+import { SearchingPop } from "@/components/searchingPopup";
+import Button from "@/components/Button";
+import { router } from "expo-router";
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 
-export default function Map() {
+interface MapProps {
+    onRide: () => void;
+}
+
+export default function Map({onRide}: MapProps) {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
-    const [isTypingOrigin, setIsTypingOrigin] = useState(false);
-    const [isTypingDestination, setIsTypingDestination] = useState(false);
+    const [position, setPosition] = useState<any>(null)
+
     const mapRef = useRef<any>(null);
 
     const [distance, setDistance] = useState<string>("");
@@ -22,19 +31,130 @@ export default function Map() {
     const [price, setPrice] = useState<number>(0);
 
 
-    function handleOriginPlaceChange(data:any) {
-        setOrigin({
-            latitude: data.lat,
-            longitude: data.lng
-        })
+    const [socket, setSocket] = useState<any>(null);
+    const [passengerId, setPassengerId] = useState<any>(null);
+    const [hasRide, setHasRide] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+
+    // BEGIN SOCKET
+
+    const connectSocket = () => {
+        const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/10/pilot/`)
+
+        socket.onopen = () => {
+            setSocket(socket);
+
+            const message = JSON.stringify({
+                type: "update_coords",
+                coords: {
+                    latitude: position.latitude,
+                    longitude: position.longitude
+                },
+                user_type : 'pilot',
+                user_id: 10,
+            });
+
+            socket.send(message)
+        }
+
+        socket.onmessage = (event: any) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'ride_request') {
+                if (hasRide === false){
+
+                    Vibration.vibrate(1000)
+                    setPassengerId(data.passenger_id);
+
+                    setOrigin(data.origin);
+                    setDestination(data.destination);
+
+                    setDistance(data.info.distance);
+                    setPrice(data.info.price);
+                    setDuration(data.info.duration);
+                    
+                    setHasRide(true);
+                }
+            }
+            if (data.type === 'pilot_confirmed') {
+                if (data.response === false){
+                    setHasRide(false);
+                    setAwaitingConfirmation(false);
+                    setIsSearching(true);
+                    setPassengerId(null);
+                }else if (data.response === true){
+                    onRide();
+                }
+            }
+            if (data.type == 'passenger_not_found'){
+                setHasRide(false);
+                setAwaitingConfirmation(false);
+                setIsSearching(true);
+                setPassengerId(null);
+            }
+        }
+
+        setIsSearching(true);
+        setSocket(socket);
     }
+
+    const remove_coords = async () => {
+        const message = JSON.stringify({
+            type: "remove_coords",
+            user_id: 10,
+            user_type: 'pilot',
+        });
+
+        await socket.send(message)
+    }
+
+    const acceptRide = () => {
+        if (socket) {
+            const message = JSON.stringify({
+                type: "respond_ride",
+                pilot_id: 10,
+                passenger_id: passengerId,
+                response: true
+            });
+            socket.send(message);
+            setHasRide(false);
+            setAwaitingConfirmation(true);
+            setIsSearching(false);
+        }
+    }
+
+    const declineRide = () => {
+        if (socket) {
+            const message = JSON.stringify({
+                type: "respond_ride",
+                pilot_id: 10,
+                passenger_id: passengerId,
+                response: false
+            });
+            socket.send(message);
+            setHasRide(false);
+        }
+    }
+
+    const cancelSearching = () => {
+        if (socket) {
+            remove_coords();
+            socket.close();
+            setIsSearching(false);
+            setAwaitingConfirmation(false);
+            setPassengerId(null);
+        }
+    }
+
+
+    //// END SOCKET
 
     async function requestLocalPermissions() {
         const { granted } = await requestForegroundPermissionsAsync();
 
         if (granted) {
             const currentPosition = await getCurrentPositionAsync();
-            setOrigin({
+            setPosition({
                 latitude: currentPosition.coords.latitude,
                 longitude: currentPosition.coords.longitude,
             });
@@ -43,48 +163,14 @@ export default function Map() {
 
     useEffect(() => {
         requestLocalPermissions();
-    }, [])
 
-    useEffect(() => {
-        if (origin && destination) {
-            setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
-            }, 0);
-        }
-    }, [origin, destination]);
-
-    useEffect(() => {
-        const getTravelTime = async () => {
-            if (origin && destination) {
-                const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.latitude},${origin.longitude}&destinations=${destination.lat},${destination.lng}&language=pt-BR&mode=driving&key=${google_key}`;
-                try {
-                    const response = await fetch(URL);
-                    const data = await response.json();
-                    if (data.rows[0].elements[0].status === "OK") {
-                        setDistance(data.rows[0].elements[0].distance.text);
-
-                        const duration = data.rows[0].elements[0].duration.text
-                        .replace(" horas", "h")
-                        .replace(" hora", "h")
-                        .replace(" minutos", "min")
-                        .replace(" minuto", "min");
-                        setDuration(duration);
-
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
-                    } else {
-                        console.error("Error fetching distance data");
-                    }
-                } catch (error) {
-                    console.error("Error fetching distance data", error);
-                }
+        return () => {
+            if (socket) {
+                remove_coords();
+                socket.close();
             }
         };
-    
-        getTravelTime();
-    }, [origin, destination]);
+    }, [])
 
     useEffect(() => {
         watchPositionAsync(
@@ -94,7 +180,7 @@ export default function Map() {
                 distanceInterval: 10,
             },
             (location) => {
-                setOrigin({
+                setPosition({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
                 });
@@ -106,60 +192,62 @@ export default function Map() {
     return (
         <View style={style.container}>
 
-            <Notification></Notification>
-            
-            { origin && 
+
+        { position && 
             <View style={style.mapContainer}>
                 <MapView
                 ref={mapRef} 
                 style={style.map}
                 initialRegion={{
-                    latitude: origin.latitude,
-                    longitude: origin.longitude,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
                     latitudeDelta: 0.0922,
                     longitudeDelta: 0.0421,
                 }}
+                accessibilityElementsHidden={false}
                 >
                     <Marker
                     coordinate={{
-                        latitude: origin.latitude,
-                        longitude: origin.longitude
+                        latitude: position.latitude,
+                        longitude: position.longitude
                     }}
                     identifier="origin"
                     title="Origem"
                     >
                     </Marker>
-                    { destination &&
-                        <Marker
-                        coordinate={{
-                            latitude: destination.lat,
-                            longitude: destination.lng,
-                        }}
-                        identifier="destination"
-                        title="Destino"
-                        >
-                        </Marker>
-                    }
-
-                    {origin && destination && (
-                        <MapViewDirections
-                        origin={{
-                            latitude: origin.latitude,
-                            longitude: origin.longitude
-                        }}
-                        destination={{
-                            latitude: destination.lat,
-                            longitude: destination.lng,
-                        }}
-                        apikey={google_key}
-                        strokeWidth={5}    
-                        strokeColor="blue"
-                        />
-                        )}
                 </MapView>
             </View>
-            }
-
+        }
+            
+            {isSearching ? (
+                hasRide ? (
+                    <Notification
+                        accept={acceptRide}
+                        decline={declineRide}
+                        origin={origin}
+                        destination={destination}
+                        position={position}
+                        value={price}
+                        duration={duration}
+                        distance={distance}
+                        passenger_id={passengerId}
+                    ></Notification>
+                ) : (
+                    <SearchingPop
+                        onCancel={cancelSearching}
+                        visible={isSearching}
+                        message="Procurando Corridas"
+                    ></SearchingPop>
+                )
+            ) : awaitingConfirmation ? (
+                <SearchingPop
+                hasButton={false}
+                visible={awaitingConfirmation}
+                message="Esperando Confirmação"
+                ></SearchingPop>
+            ) : (
+                <Button onPress={connectSocket} title="Procurar Corrida"></Button>
+            )}
         </View>
     );
 }

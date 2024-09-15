@@ -55,9 +55,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments/payment"
+        name="payments/[id]"
         options={{
-          title: 'Pagamento',
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="ridehistory/index"
+        options={{
+          title: 'Histórico',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />

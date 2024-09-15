@@ -6,6 +6,7 @@ export const style = StyleSheet.create({
         alignItems: "center",
     },
     map: {
+        ...StyleSheet.absoluteFillObject,
         width: "100%",
         height: "100%",
         borderBottomRightRadius: 25,
@@ -31,18 +32,18 @@ export const style = StyleSheet.create({
     },
     overmap: {
         position: "absolute",
-        bottom: 90,
+        bottom: "10.5%",
         alignItems: "center",
         width: "100%"
     },
     confirmPopup: {
         width: "80%",
+        height: "40%",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "space-around",
         margin: 12,
         elevation: 10,
-        height: 200,
         backgroundColor: "white",
         borderRadius: 16,
     },

@@ -1,4 +1,4 @@
-export const to_br_real = (value: number) => {
+export const to_br_real = (value: number | string) => {
     if(typeof value !== 'number') {
         try{
             value = parseFloat(value);

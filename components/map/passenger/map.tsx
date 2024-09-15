@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, PanResponder } from "react-native";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy } from "expo-location";
 import { useState, useEffect } from "react";
 import MapView, { Marker } from "react-native-maps";
@@ -9,11 +9,18 @@ import Badge from "../../badge/badge";
 import RNPickerSelect from 'react-native-picker-select';
 import Button from "../../Button";
 import { useRef } from "react";
-
+import { SearchingPop } from "@/components/searchingPopup";
+import { to_br_real } from "@/components/utils/to-real";
+import { PassengerNotification } from "@/components/notifications/passengerConfirm";
+import { router } from "expo-router";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
+interface mapsProps {
+    onRide : () => void;
+}
 
-export default function Map() {
+export default function Map({onRide}: mapsProps) {
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const [isTypingOrigin, setIsTypingOrigin] = useState(false);
@@ -22,7 +29,124 @@ export default function Map() {
 
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number>(0);
+    const [price, setPrice] = useState<number | string>(0);
+
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [socket, setSocket] = useState<any>(null);
+    const [hasPilot, setHasPilot] = useState(false);
+    const [pilotId, setPilotId] = useState<any>(null);
+
+    // BEGIN QUEUE SOCKET
+    const connectSocket = async () => {
+        return new Promise((resolve, reject) => {
+            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/1/passenger/`);
+    
+            socket.onopen = () => {
+                setSocket(socket);
+                resolve(socket); 
+
+                const message = JSON.stringify({
+                    type: "update_coords",
+                    coords: {
+                        latitude: origin.latitude,
+                        longitude: origin.longitude
+                    },
+                    user_type : 'passenger',
+                    user_id: 1,
+                });
+
+                socket.send(message)
+            };
+    
+            socket.onerror = (error) => {
+                console.log('WebSocket Error: ', error);
+                reject(error); 
+            };
+
+            socket.onmessage = (event: any) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'ride_response') {
+                    if(hasPilot === false){
+                        setPilotId(data.pilot_id);
+                        setHasPilot(true);
+                    }
+                }
+            }
+        });
+    };
+    
+    const requestRide = async () => {
+
+        try {
+            const socket = await connectSocket() as WebSocket;
+            const message = JSON.stringify({
+                type: "request_ride",
+                passenger_id: 1,
+                origin: origin,
+                destination: {
+                    latitude: destination.lat,
+                    longitude: destination.lng
+                },
+                info: {
+                    distance: distance,
+                    duration: duration,
+                    price: price,
+                }
+            });
+            socket.send(message); 
+            setIsConfirmed(true);
+        } catch (error) {
+            Alert.alert('Erro', 'Não foi possível estabelecer a conexão. Tente novamente.');
+        }
+    };
+
+    const remove_coords = async () => {
+        const message = JSON.stringify({
+            type: "remove_coords",
+            user_id: 1,
+            user_type: 'passenger',
+        });
+
+        await socket.send(message)
+    }
+    
+    const cancelRide = () => {
+        if (socket) {
+            remove_coords();
+            socket.close();
+            setIsConfirmed(false);
+        }
+    };
+
+    const declinePilot = async () => {
+        if (socket) {
+            const message = JSON.stringify({
+                type: "confirm_pilot",
+                pilot_id: 10,
+                ride_id: null,
+                response: false
+            });
+            socket.send(message);
+            setHasPilot(false);
+        }
+    }
+
+    const acceptPilot = async () => {
+        if (socket) {
+
+            /// WILL CALL CREATE RIDE HERE THEN SEND TO PILOT
+            const message = JSON.stringify({
+                type: "confirm_pilot",
+                ride_id: 5,
+                pilot_id: pilotId,
+                response: true
+            });
+            await socket.send(message);
+            setHasPilot(false);
+            onRide();
+        }
+    }
+    //// END QUEUE SOCKET
 
 
     function handleOriginPlaceChange(data:any) {
@@ -46,6 +170,13 @@ export default function Map() {
 
     useEffect(() => {
         requestLocalPermissions();
+
+        return () => {
+            if (socket) {
+                remove_coords();
+                socket.close();
+            }
+        };
     }, [])
 
     useEffect(() => {
@@ -76,7 +207,7 @@ export default function Map() {
                         setDuration(duration);
 
                         const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(parseFloat(price));
+                        setPrice(to_br_real(price));
                     } else {
                         console.error("Error fetching distance data");
                     }
@@ -109,7 +240,6 @@ export default function Map() {
     return (
         <View style={style.container}>
 
-        
         { origin && 
         <View style={style.mapContainer}>
             <MapView
@@ -121,6 +251,7 @@ export default function Map() {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
             }}
+            accessibilityElementsHidden={false}
             >
                 <Marker
                 coordinate={{
@@ -162,45 +293,40 @@ export default function Map() {
         </View>
         }
 
-        <View style={[
-            origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
-        ]}>
-                { origin && destination && !isTypingOrigin &&
-                    <DestinationInput isOrigin={true} setIsTyping={setIsTypingDestination} placeholder="Localização Atual" setDestination={handleOriginPlaceChange}/>
-                }
-                { !isTypingDestination &&
-                    <DestinationInput isOrigin={false} setIsTyping={setIsTypingOrigin} placeholder="Para onde vamos?" setDestination={setDestination}/>
-                }
-                { origin && destination && !isTypingOrigin && !isTypingDestination &&
-                    <View style={style.confirmPopup}>
-                        <View style={{
-                            flexDirection: "row",
-                            width: "80%",
-                            justifyContent: "space-around",
-                        }}>
-                            <Badge value={distance}></Badge>
-                            <Badge value={duration}></Badge>
-                            <Badge color={"#34C17D"} value={`R$ ${price}`}></Badge>
+    
+        { hasPilot ?
+            <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
+        : isConfirmed ? (
+            <SearchingPop visible={isConfirmed} onCancel={() => cancelRide()} message="Procurando pilotos disponíveis..."/>
+        ) :
+            (
+            <View style={[
+                origin && destination ? style.overmapfull : style.overmap, isTypingOrigin || isTypingDestination ? {bottom: 25} : {}
+            ]}>
+                    { origin && destination && !isTypingOrigin &&
+                        <DestinationInput isOrigin={true} setIsTyping={setIsTypingDestination} placeholder="Localização Atual" setDestination={handleOriginPlaceChange}/>
+                    }
+                    { !isTypingDestination &&
+                        <DestinationInput isOrigin={false} setIsTyping={setIsTypingOrigin} placeholder="Para onde vamos?" setDestination={setDestination}/>
+                    }
+                    { origin && destination && !isTypingOrigin && !isTypingDestination &&
+                        <View style={style.confirmPopup}>
+                            <View style={{
+                                flexDirection: "row",
+                                width: "80%",
+                                justifyContent: "space-around",
+                            }}>
+                                <Badge value={distance}></Badge>
+                                <Badge value={duration}></Badge>
+                                <Badge color={"#34C17D"} value={price}></Badge>
+                            </View>
+                            <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
                         </View>
-                        <View style={{
-                            borderWidth: 1,
-                            borderColor: "#34C17D",
-                            borderRadius: 20,
-                            width: "80%",
-                        }}>
-                            <RNPickerSelect
-                                onValueChange={(value) => console.log(value)}
-                                items={[
-                                    { label: 'Pix', value: 'pix' },
-                                    { label: 'Cartão de Crédito', value: 'credit-card' },
-                                ]}
-                                placeholder={{label:"Pagamento", value: null}}
-                            />
-                        </View>
-                        <Button style={{width: "80%"}} title="Confirmar"/>
-                    </View>
-                }
-        </View>
+                    }
+            </View>
+            )
+        }
+
 
     </View>
   );
