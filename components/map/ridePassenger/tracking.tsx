@@ -6,7 +6,6 @@ import {style} from "./styles"
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
 import { Notification } from "@/components/notifications/notification";
-import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { useLocalSearchParams } from "expo-router";
@@ -25,7 +24,7 @@ const temp_origin = {
 
 const temp_destination = {
     lat : -6.112170799999999,
-    lng: -38.3067149,
+    lng: -38.2065018,
 }
 
 
@@ -54,7 +53,7 @@ export default function RidePassengerExecution() {
             if (data.type == 'finish_ride'){
                 router.replace('/(passenger)/payments/5')
             }
-            if (data.type == 'pilot_position'){
+            else if (data.type == 'pilot_position'){
                 setPilotCoords({
                     latitude: data.latitude,
                     longitude: data.longitude

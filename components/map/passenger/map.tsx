@@ -9,7 +9,6 @@ import Badge from "../../badge/badge";
 import RNPickerSelect from 'react-native-picker-select';
 import Button from "../../Button";
 import { useRef } from "react";
-import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import { to_br_real } from "@/components/utils/to-real";
 import { PassengerNotification } from "@/components/notifications/passengerConfirm";

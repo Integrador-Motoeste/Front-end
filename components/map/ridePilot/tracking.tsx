@@ -6,7 +6,6 @@ import {style} from "./styles"
 import MapViewDirections from "react-native-maps-directions";
 import { useRef } from "react";
 import { Notification } from "@/components/notifications/notification";
-import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { router, useLocalSearchParams } from "expo-router";
@@ -23,7 +22,7 @@ const temp_origin = {
 
 const temp_destination = {
     lat : -6.112170799999999,
-    lng: -39.3067149,
+    lng: -38.2065018,
 }
 
 
@@ -53,6 +52,9 @@ export default function RidePilotExecution() {
             if (data.type === 'confirm_boarding'){
                 setIsBoarded(true);
             }
+            else if (data.type == 'finish_ride'){
+                router.replace('/(passenger)/payments/5')
+            }
         }
     }
 
@@ -62,7 +64,8 @@ export default function RidePilotExecution() {
                 type: 'change_pilot_position',
                 ride_id: id,
                 latitude: position.latitude,
-                longitude: position.longitude
+                longitude: position.longitude,
+                destination: destination,
             }));
         }
     }, [position, socket]);
@@ -98,19 +101,6 @@ export default function RidePilotExecution() {
             }
         }
     }, [[origin, destination, position]]);
-
-    const finishRide = async () => {
-        if (socket){
-            socket.send(JSON.stringify({
-                type: 'finish_ride',
-                ride_id: id,
-            }));
-
-            //atualiza o estado da corrida
-
-            router.replace('/(pilot)/payments/5');
-        }
-    }
 
     useEffect(() => {
         const watchPosition = async () => {
@@ -213,7 +203,6 @@ export default function RidePilotExecution() {
                 </View>
             )}
 
-        <Button onPress={finishRide} title="Finalizar"></Button>
         </View>
     );
 }
