@@ -1,48 +1,74 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold ,InterTight_600SemiBold, Inter_900Black, InterTight_300Light, Inter_700Bold } from '@expo-google-fonts/dev';
-import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import { Slot, useRouter } from 'expo-router';
-import { tokenCache } from './storage/toekCache';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+import 'react-native-reanimated';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { useColorScheme } from '@/components/useColorScheme';
 
-const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string;
+export {
+  // Catch any errors thrown by the Layout component.
+  ErrorBoundary,
+} from 'expo-router';
 
-function InitialLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const router = useRouter();
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: '(pilot)',
+};
 
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-    if (isSignedIn) {
-      router.replace("/(public)"); 
-    } else {
-      router.replace("/(auth)"); 
-    }
-  }, [isSignedIn, isLoaded]);
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
-  return isLoaded ? <Slot /> : <ActivityIndicator size="large" color="#1FD87F" />;
-}
-
-export default function Layout() {
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    InterTight_600SemiBold,
-    InterTight_300Light,
-    Inter_700Bold,
-    Inter_900Black,
-    Inter_500Medium,
-    Inter_600SemiBold,
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    ...FontAwesome.font,
   });
 
-  if (!fontsLoaded) {
-    return null; 
+  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
   }
 
+  return <RootLayoutNav />;
+}
+
+
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+
+  const [loaded, error] = useFonts({
+    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold
+  });
+
+  useEffect(() => {
+      if (loaded || error) {
+        SplashScreen.hideAsync();
+      }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+      return null;
+  }
+
+
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-      <InitialLayout />
-    </ClerkProvider>
+      <Stack initialRouteName='(passenger)'>
+        <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
+        <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
+      </Stack>
   );
 }
