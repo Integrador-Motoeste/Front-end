@@ -1,74 +1,47 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Slot, Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
 import 'react-native-reanimated';
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { useColorScheme } from '@/components/useColorScheme';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black, InterTight_300Light } from '@expo-google-fonts/dev';
+import { AuthContext } from '@/context/AuthContext';
+import { ActivityIndicator, View } from 'react-native';
+import AppLogin from './(auth)';
+import { AuthProvider } from '@/context/AuthContext';
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(pilot)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default function RootLayoutNav() {
+
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black, InterTight_300Light
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  const [loaded, error] = useFonts({
-    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold
-  });
-
-  useEffect(() => {
-      if (loaded || error) {
-        SplashScreen.hideAsync();
-      }
   }, [loaded, error]);
 
   if (!loaded && !error) {
-      return null;
+    return null;
   }
 
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
-      <Stack initialRouteName='(passenger)'>
-        <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
-        <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
-      </Stack>
-  );
+    <AuthProvider>
+      <Slot></Slot>
+    </AuthProvider>
+  )
 }
