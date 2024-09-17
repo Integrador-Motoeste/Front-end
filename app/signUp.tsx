@@ -2,7 +2,8 @@ import { Container,ContainerButtons } from "./style";
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import ButtonOutLine from '@/components/ButtonOutLine';
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 
 export default function SignUp() {
@@ -12,7 +13,7 @@ export default function SignUp() {
   const [rePassword, setRePassword] = useState('');
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
-
+  const { signUp } = useContext(AuthContext);
 
   return (
     <Container>
@@ -24,11 +25,13 @@ export default function SignUp() {
         <Input outline={true} value={rePassword} placeholder="Confirmar Senha" onChangeText={(value) => setRePassword(value)} />
 
         <ContainerButtons>
-            <Button title="Cadastrar" />
+            <Button title="Cadastrar" onPress={() => {
+                signUp(emailAddress, password, rePassword, name, lastName);
+              }} />
             <ButtonOutLine
               isLoading={isLoading}
               onPress={() => {
-                setIsLoading(true);
+                signUp(emailAddress, password, rePassword, name, lastName);
               }}
               icon="logo-google"
               title="Cadastrar com o Google"

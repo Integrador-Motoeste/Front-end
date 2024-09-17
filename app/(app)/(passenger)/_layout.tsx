@@ -8,6 +8,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
+
+import  MainIcon from '@/assets/SVG/main-icon-menu';
+import ProfileIconMenu from '@/assets/SVG/profile-icon-menu';
+import ListRidescIcon from '@/assets/SVG/listRides-icon-menu';
+
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
@@ -42,21 +47,21 @@ export default function TabLayout() {
         name="ridehistory/index"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <MaterialIcons name="reorder" size={40} color="white" />,
+          tabBarIcon: ({ color }) => <ListRidescIcon/>,
         }}
       />
       <Tabs.Screen
         name="index"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="racing-helmet" size={40} color="white" />,
+          tabBarIcon: ({ color }) => <MainIcon/>,
         }}
       />
       <Tabs.Screen
         name="two"
         options={{
           title: '',
-          tabBarIcon: ({ color }) => <Ionicons name="person" size={40} color="white" />,
+          tabBarIcon: ({ color }) => <ProfileIconMenu/>,
         }}
         />
       <Tabs.Screen

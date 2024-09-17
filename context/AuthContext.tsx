@@ -25,6 +25,7 @@ interface UserInterface {
 export const AuthContext = createContext({
     login: (email: string, password: string) => { },
     logout: () => { },
+    signUp: (email: string, password1: string, password2: string, first_name: string, last_name: string) => { },
     isLoading: true,
     userToken: null as string | null,
     user: null as UserInterface | null,
@@ -69,6 +70,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       };
 
+    const signUp = async (email: string, password1: string, password2: string, first_name: string, last_name: string) => {
+        setIsLoading(true);
+        console.log("Fazendo login no context...");
+        const authService = new AuthService("");
+        const data = {
+          'email': email,
+          'password1': password1,
+          'password2': password2,
+          'first_name': first_name,
+          'last_name': last_name
+        }
+
+        const response = await authService.signUpUser(data)
+
+        if (response && response.status === 201) {
+            router.replace("/");
+        } else {
+            console.error("Erro ao fazer cadastro: Resposta inesperada", response);
+            router.replace("/");
+        }
+      }
+
     const logout = () => {
         setUser(null);
         setUserToken(null);
@@ -76,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     return (
-        <AuthContext.Provider value={{ login, logout, isLoading, userToken, user }}>
+        <AuthContext.Provider value={{ login, logout, isLoading, userToken, user, signUp }}>
             {children}
         </AuthContext.Provider>
     );
