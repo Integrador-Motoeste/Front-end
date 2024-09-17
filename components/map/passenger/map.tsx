@@ -13,6 +13,8 @@ import { SearchingPop } from "@/components/searchingPopup";
 import { to_br_real } from "@/components/utils/to-real";
 import { PassengerNotification } from "@/components/notifications/passengerConfirm";
 import { router } from "expo-router";
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
@@ -21,6 +23,7 @@ interface mapsProps {
 }
 
 export default function Map({onRide}: mapsProps) {
+    const { userToken, isLoading, user } = useContext(AuthContext);
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const [isTypingOrigin, setIsTypingOrigin] = useState(false);
@@ -39,7 +42,7 @@ export default function Map({onRide}: mapsProps) {
     // BEGIN QUEUE SOCKET
     const connectSocket = async () => {
         return new Promise((resolve, reject) => {
-            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/1/passenger/`);
+            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/${user?.id}/passenger/`);
     
             socket.onopen = () => {
                 setSocket(socket);
@@ -52,7 +55,7 @@ export default function Map({onRide}: mapsProps) {
                         longitude: origin.longitude
                     },
                     user_type : 'passenger',
-                    user_id: 1,
+                    user_id: user?.id,
                 });
 
                 socket.send(message)
@@ -81,7 +84,7 @@ export default function Map({onRide}: mapsProps) {
             const socket = await connectSocket() as WebSocket;
             const message = JSON.stringify({
                 type: "request_ride",
-                passenger_id: 1,
+                passenger_id: user?.id,
                 origin: origin,
                 destination: {
                     latitude: destination.lat,
@@ -103,7 +106,7 @@ export default function Map({onRide}: mapsProps) {
     const remove_coords = async () => {
         const message = JSON.stringify({
             type: "remove_coords",
-            user_id: 1,
+            user_id: user?.id,
             user_type: 'passenger',
         });
 
@@ -122,11 +125,12 @@ export default function Map({onRide}: mapsProps) {
         if (socket) {
             const message = JSON.stringify({
                 type: "confirm_pilot",
-                pilot_id: 10,
+                pilot_id: pilotId,
                 ride_id: null,
                 response: false
             });
             socket.send(message);
+            setPilotId(null);
             setHasPilot(false);
         }
     }

@@ -10,6 +10,9 @@ import { io } from "socket.io-client";
 import { SearchingPop } from "@/components/searchingPopup";
 import Button from "@/components/Button";
 import { router } from "expo-router";
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+
 
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
@@ -20,6 +23,7 @@ interface MapProps {
 }
 
 export default function Map({onRide}: MapProps) {
+    const { userToken, isLoading, user } = useContext(AuthContext);
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const [position, setPosition] = useState<any>(null)
@@ -40,7 +44,7 @@ export default function Map({onRide}: MapProps) {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/10/pilot/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/${user?.id}/pilot/`)
 
         socket.onopen = () => {
             setSocket(socket);
@@ -52,7 +56,7 @@ export default function Map({onRide}: MapProps) {
                     longitude: position.longitude
                 },
                 user_type : 'pilot',
-                user_id: 10,
+                user_id: user?.id,
             });
 
             socket.send(message)
@@ -101,7 +105,7 @@ export default function Map({onRide}: MapProps) {
     const remove_coords = async () => {
         const message = JSON.stringify({
             type: "remove_coords",
-            user_id: 10,
+            user_id: user?.id,
             user_type: 'pilot',
         });
 
@@ -112,7 +116,7 @@ export default function Map({onRide}: MapProps) {
         if (socket) {
             const message = JSON.stringify({
                 type: "respond_ride",
-                pilot_id: 10,
+                pilot_id: user?.id,
                 passenger_id: passengerId,
                 response: true
             });
@@ -127,7 +131,7 @@ export default function Map({onRide}: MapProps) {
         if (socket) {
             const message = JSON.stringify({
                 type: "respond_ride",
-                pilot_id: 10,
+                pilot_id: user?.id,
                 passenger_id: passengerId,
                 response: false
             });
@@ -231,6 +235,7 @@ export default function Map({onRide}: MapProps) {
                         duration={duration}
                         distance={distance}
                         passenger_id={passengerId}
+                        token={userToken as string}
                     ></Notification>
                 ) : (
                     <SearchingPop

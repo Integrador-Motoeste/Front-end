@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-interface Ride{
+export interface Ride{
     id: number;
     value: number;
     distance: number;
@@ -57,8 +57,8 @@ export default class ridesService {
         }
     }
 
-    async get_ride_by_user(id: number){
-        const url = `${this.baseUrl}rides_by_passenger?passenger_id=${id}`
+    async get_rides(){
+        const url = `${this.baseUrl}my_rides/`
         try{
             const response = await this.axiosClient.get(url, {
                 headers: {
@@ -72,8 +72,8 @@ export default class ridesService {
         }
     }
 
-    async get_active_ride_by_user(id: number){
-        const url = `${this.baseUrl}active_rides_by_passenger?passenger_id=${id}`
+    async get_active_ride(){
+        const url = `${this.baseUrl}get_active_ride/`
         try{
             const response = await this.axiosClient.get(url, {
                 headers: {
