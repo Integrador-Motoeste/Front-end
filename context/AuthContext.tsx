@@ -59,13 +59,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUser(response.data.user);
             console.log("Login feito com sucesso:", response.data.user);
             if (response.data.user.groups[0] === 1) {
-              router.replace("/(passenger)");
+              router.replace("(app)/(passenger)");
             } else {
-              router.replace("/(pilot)");
+              router.replace("(app)/(pilot)");
             }
         } else {
             console.error("Erro ao fazer login: Resposta inesperada", response);
-            router.replace("/(auth)");
+            router.replace("/");
         }
       };
 

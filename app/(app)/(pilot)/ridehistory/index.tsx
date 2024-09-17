@@ -2,7 +2,7 @@ import React from "react";
 import {ScrollView, Text, View} from 'react-native';
 import { style } from "./styles";
 import {MaterialIcons} from '@expo/vector-icons';
-import {RideCardHistory} from '../../../components/ridecard/index'
+import {RideCardHistory} from '../../../../components/ridecard/index'
 
 export default function RideHistory (){
     return (

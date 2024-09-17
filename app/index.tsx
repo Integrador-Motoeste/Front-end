@@ -1,57 +1,68 @@
-import { useFonts } from 'expo-font';
-import { Slot, Stack, useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useContext } from 'react';
-import 'react-native-reanimated';
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black, InterTight_300Light } from '@expo-google-fonts/dev';
+import HelmetMain from '@/assets/SVG/helmet-main';
+import { Container, Header, Logo, MainLogin, Title, ContainerButtons, SignUpContent, ContainerSignUpText, SubTitle, TitleSignUp } from './style';
+import { StatusBar } from 'expo-status-bar';
+import { useState, useEffect, useContext } from 'react';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
+import ButtonOutLine from '@/components/ButtonOutLine';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import * as WebBrowser from 'expo-web-browser';
+import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
-import AppLogin from './(auth)';
+import { Redirect, Stack } from 'expo-router';
 
+WebBrowser.maybeCompleteAuthSession();
 
-export {
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  initialRouteName: '(pilot)',
-};
-
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayoutNav() {
-  const { userToken, isLoading, user } = useContext(AuthContext);
+export default function AppLogin() {
+  const [emailAddress, setEmailAddress] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
-    console.log(user)
-
-  function InitialNav () {
-    return (
-      <Stack initialRouteName='(passenger)'>
-          <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
-          <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
-      </Stack>
-    )
-  }
-
-  // useEffect(() => {
-  //   if (userToken === null) {
-  //     router.replace('/(auth)');
-  //   } else{
-  //     InitialNav()
-  //   }
-  // }, [userToken]);
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#1FD87F" />
-      </View>
-    );
-  }
+  const { user, login, isLoading } = useContext(AuthContext);
+  const [isLogged, setIsLogged] = useState(true);	
 
   return (
-    <>
-      { userToken === null ? <AppLogin></AppLogin> : <InitialNav></InitialNav> }
-    </>
-  )
+    <Container>
+      <StatusBar style="auto" />
+      <Header>
+        <Logo>MOTOCAR</Logo>
+      </Header>
+
+      <HelmetMain />
+
+      <MainLogin>
+        <Title>Bem-Vindo</Title>
+
+        <Input
+          value={emailAddress}
+          placeholder="Email"
+          onChangeText={(email: string) => setEmailAddress(email)}
+        />
+        <Input
+          value={password}
+          placeholder="Senha"
+          secureTextEntry={true}
+          onChangeText={(password: string) => setPassword(password)}
+        />
+        <ContainerButtons>
+          <Button title="Entrar" onPress={() => { login(emailAddress, password)}} />
+          <ButtonOutLine
+            isLoading={isLoading}
+            onPress={() => {}}
+            icon="logo-google"
+            title="Entrar com o Google"
+          />
+        </ContainerButtons>
+      </MainLogin>
+
+      <Link href={'/signUp'} asChild>
+        <SignUpContent>
+          <ContainerSignUpText>
+            <TitleSignUp>Sou novo aqui</TitleSignUp>
+            <SubTitle>Cadastrar-me</SubTitle>
+          </ContainerSignUpText>
+          <EvilIcons name="arrow-right" size={50} color="#1FD87F" />
+        </SignUpContent>
+      </Link>
+    </Container>
+  );
 }
