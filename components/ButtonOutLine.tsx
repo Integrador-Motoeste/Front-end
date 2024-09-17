@@ -33,7 +33,6 @@ const Text = Styled.Text`
     `;
 
 const ButtonDefault = Styled.TouchableOpacity`
-    padding: 12px 6px;
     border-radius: 47px;
     margin: 10px;
     width: 297px;

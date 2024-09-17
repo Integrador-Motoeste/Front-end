@@ -6,8 +6,7 @@ import 'react-native-reanimated';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black, InterTight_300Light } from '@expo-google-fonts/dev';
 import { AuthContext } from '@/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
-import AppLogin from './(app)/(auth)';
-import { AuthProvider } from '@/context/AuthContext';
+
 
 export {
   ErrorBoundary,
@@ -17,31 +16,14 @@ export const unstable_settings = {
   initialRouteName: '(pilot)',
 };
 
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayoutNav() {
+    const { userToken, isLoading, user } = useContext(AuthContext);
 
-  const [loaded, error] = useFonts({
-    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black, InterTight_300Light
-  });
-
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error]);
-
-  if (!loaded && !error) {
-    return null;
-  }
-
-  if (!loaded && !error) {
-    return null;
-  }
-
-  return (
-    <AuthProvider>
-      <Slot></Slot>
-    </AuthProvider>
-  )
+    return (
+        <Stack initialRouteName='(passenger)'>
+          <Stack.Screen name="(pilot)" options={{ headerShown: false }} />
+          <Stack.Screen name="(passenger)" options={{ headerShown: false }} />
+        </Stack>
+    )
 }
