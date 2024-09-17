@@ -17,16 +17,6 @@ export default function AppLogin() {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { user, login, isLoading } = useContext(AuthContext);
-  
-
-  const handleLogin = async () => {
-    try {
-      console.log("Fazendo login...");
-      login(emailAddress, password);
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-    }
-  };
 
   // useEffect(() => {
   //   if (user) {

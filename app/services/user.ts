@@ -25,7 +25,7 @@ export type UserSignIn = {
 
 export default class UserService {
     private axiosClient = api;
-    private baseUrl = "users/"
+    private baseUrl = "api/users/"
     private authToken = "";
 
     constructor(authToken: string) {

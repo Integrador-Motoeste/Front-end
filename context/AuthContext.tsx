@@ -46,23 +46,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         console.log("Fazendo login no context...");
         const authService = new AuthService("");
-        try {
-          const response = await axios.post("http://192.168.0.16:8000/dj-rest-auth/login/", { email, password });
-          if (response && response.status === 200) {
+        const data = {
+          'email': email,
+          'password': password
+        }
+
+        const response = await authService.login(data)
+
+        if (response && response.status === 200) {
             setUserToken(response.data.access);
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
             console.log("Login feito com sucesso:", response.data.user);
-            if (user?.groups[0] === 1) {
+            if (response.data.user.groups[0] === 1) {
               router.replace("/(passenger)");
+            } else {
+              router.replace("/(pilot)");
             }
-          } else {
+        } else {
             console.error("Erro ao fazer login: Resposta inesperada", response);
-          }
-        } catch (error: any) {
-          console.error("Erro ao fazer login:", error.message);
-        } finally {
-          setIsLoading(false);
+            router.replace("/(auth)");
         }
       };
 

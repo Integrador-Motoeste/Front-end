@@ -6,7 +6,7 @@ if (!url) {
   throw new Error("EXPO_PUBLIC_BACKEND_URL não está definida");
 }
 
-const BASE_URL = `${url}/api/`;
+const BASE_URL = `${url}`;
 
 export const api = axios.create({
   baseURL: BASE_URL,
