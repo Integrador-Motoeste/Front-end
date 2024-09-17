@@ -32,7 +32,7 @@ export type QRCodeType = {
 
 export default class InvoiceService {
     private axiosClient = api;
-    private baseUrl = "invoices/"
+    private baseUrl = "/api/invoices/"
     private authToken = "";
 
     constructor(authToken: string) {

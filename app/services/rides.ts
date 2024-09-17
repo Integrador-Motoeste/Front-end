@@ -21,7 +21,7 @@ interface Ride{
 
 export default class ridesService {
     private axiosClient = api;
-    private baseUrl = "rides/"
+    private baseUrl = "/api/rides/"
     private authToken = "";
 
     constructor(authToken: string) {
