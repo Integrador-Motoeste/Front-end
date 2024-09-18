@@ -153,7 +153,7 @@ export default function Map({onRide}: mapsProps) {
 
             const newRide: RideCreate = {
                 distance: parseFloat(distance.replace(" km", "").replace(",", ".")), 
-                duration: parseFloat(duration.replace("h", "").replace("min", "").replace(",", ".")),
+                duration: duration as string,
                 pilot: pilotId,
                 passenger: user?.id as number,
                 start_lat: origin.latitude,
@@ -164,8 +164,6 @@ export default function Map({onRide}: mapsProps) {
                 destination: destinationText,
                 status: "started",
             };
-
-            console.log(newRide)
 
             const response = await ride_service.createRide(newRide);
 

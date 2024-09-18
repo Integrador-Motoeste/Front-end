@@ -36,7 +36,6 @@ export default function TabOneScreen() {
     <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto"/>
       { hasRide ? (
-        //Passar corrida ativa por props
         <RidePassengerExecution></RidePassengerExecution>
       ):(
         <Map onRide={() => onRideRequest()}></Map>

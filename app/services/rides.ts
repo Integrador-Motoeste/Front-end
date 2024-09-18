@@ -2,7 +2,7 @@ import { api } from "./api";
 
 export interface Ride{
     distance: number;
-    duration: number;
+    duration: string;
     pilot: number;
     client: number;
     start_lat : number;
@@ -20,7 +20,7 @@ export interface Ride{
 
 export interface RideCreate{
     distance: number;
-    duration: number;
+    duration: string;
     pilot: number;
     passenger: number;
     start_lat : number;
