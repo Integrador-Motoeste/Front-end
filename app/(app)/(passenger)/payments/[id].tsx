@@ -13,11 +13,12 @@ import { to_br_real } from "@/components/utils/to-real";
 import CopyPastIcon from "@/assets/SVG/copypaste";
 import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
+import Button from "@/components/Button";
 
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
@@ -128,6 +129,7 @@ export default function PaymentPassenger(){
                             }}>
                                 <CheckIcon/>
                             </View>
+                            <Button title="Voltar" onPress={() => {router.replace('/(app)/(passenger)')}}/>
                         </>
                     ) : (
                         <>

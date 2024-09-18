@@ -21,6 +21,7 @@ import Button from "@/components/Button";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
+import { router } from "expo-router";
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 export default function PaymentPilot (){
@@ -142,6 +143,7 @@ export default function PaymentPilot (){
                                 }}>
                                     <CheckIcon/>
                                 </View>
+                                <Button title="Voltar" onPress={() => {router.replace('/(app)/(pilot)')}}/>
                             </>
                         ) : (
                             <>
