@@ -4,6 +4,7 @@ import Button from '@/components/Button';
 import ButtonOutLine from '@/components/ButtonOutLine';
 import { useContext, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import PasswordInput from '@/components/PasswordInput';
 
 
 export default function SignUp() {
@@ -21,8 +22,8 @@ export default function SignUp() {
         <Input outline={true} value={name} placeholder="Nome" onChangeText={(value) => setName(value)}/>
         <Input outline={true} value={lastName} placeholder="Sobrenome" onChangeText={(value) => setLastName(value)} />
         <Input outline={true} value={emailAddress} placeholder="Email" onChangeText={(value) => setEmailAddress(value)} />
-        <Input outline={true} value={password} placeholder="Senha" onChangeText={(value) => setPassword(value)} />
-        <Input outline={true} value={rePassword} placeholder="Confirmar Senha" onChangeText={(value) => setRePassword(value)} />
+        <PasswordInput outline={true} password={password} setPassword={setPassword}></PasswordInput>
+        <PasswordInput outline={true} password={rePassword} setPassword={setRePassword}></PasswordInput>
 
         <ContainerButtons>
             <Button title="Cadastrar" onPress={() => {

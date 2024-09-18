@@ -12,8 +12,8 @@ export default function Profile() {
   const baseURL = 'http://192.168.0.16:8000';
 
   const profileImageUrl = user?.picture
-    ? `${baseURL}${user.picture}`
-    : "";
+    ? `${user.picture}`
+    : "assets/images/icon.png";
 
   return (
     <Container>

@@ -12,11 +12,11 @@ interface PasswordInputProps {
   outline?: boolean;
 }
 
-export default function PasswordInput({ password, setPassword, width, height}: PasswordInputProps) {
+export default function PasswordInput({ password, setPassword, width, height, outline }: PasswordInputProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
-    <PasswordContainer width={width} height={height} password={password} setPassword={setPassword}>
+    <PasswordContainer width={width} height={height} outline={outline} password={password} setPassword={setPassword}>
       <StyledInput
         value={password}
         placeholder="Senha"

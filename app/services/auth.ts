@@ -59,5 +59,22 @@ export default class AuthService {
         return error.response;
       }
     }
-  }
+
+    async logout() {
+      const url = `${this.baseUrl}logout/`;
+      try {
+        const response = await this.axiosClient.post(url, {}, {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        });
+        return response;
+      }
+      catch (error: any) {
+        console.error("Error logging out:", error.message);
+        return error.response;
+      }
+    }
+    
+}
 

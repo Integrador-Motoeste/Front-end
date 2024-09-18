@@ -1,15 +1,14 @@
+import { AuthContext } from '@/context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useContext } from 'react';
 import Styled from 'styled-components/native';
-import { useNavigation } from '@react-navigation/native';
-import { useClerk } from '@clerk/clerk-expo';
 
 
 export default function ExitButton() {
-    const { signOut } = useClerk();
-
+    const { logout } = useContext(AuthContext);
 
     return (
-        <Button onPress={() => signOut({redirectUrl: ("/(auth)")})}>
+        <Button onPress={() => logout()}>
             <Ionicons name="exit-outline" size={22} color="#c41b1b" />
             <Text>Sair</Text>
         </Button>

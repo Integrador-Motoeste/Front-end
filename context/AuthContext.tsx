@@ -1,10 +1,8 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import AuthService from "@/app/services/auth";
-import axios from "axios";
 import { router } from "expo-router";
 import { Float } from "react-native/Libraries/Types/CodegenTypes";
-import { Use } from "react-native-svg";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface UserInterface {
     id: number;
@@ -58,7 +56,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUserToken(response.data.access);
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
+            AsyncStorage.setItem("userToken", response.data.access);
             console.log("Login feito com sucesso:", response.data.user);
+
             if (response.data.user.groups[0] === 1) {
               router.replace("(app)/(passenger)");
             } else {
@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(true);
         console.log("Fazendo login no context...");
         const authService = new AuthService("");
+        
         const data = {
           'email': email,
           'password1': password1,
@@ -85,18 +86,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const response = await authService.signUpUser(data)
 
         if (response && response.status === 201) {
-            router.replace("/");
+            login(email, password1);
         } else {
             console.error("Erro ao fazer cadastro: Resposta inesperada", response);
             router.replace("/");
         }
       }
 
-    const logout = () => {
+    const logout = async () => {
+      const authService = new AuthService({ userToken } as unknown as string);
+      const response = await authService.logout()
+      if (response && response.status === 200) {
+        console.log("Logout feito com sucesso");
+        setIsLoading(true)
+        AsyncStorage.removeItem("userToken");
         setUser(null);
         setUserToken(null);
         setUserRefreshToken(null);
+        setIsLoading(false);
+        } else {
+            console.error("Erro ao fazer logout: Resposta inesperada", response);
+        }
     }
+
+    useEffect(() => {
+        const loadStorageData = async () => {
+            const token = await AsyncStorage.getItem("userToken");
+            if (token) {
+                setUserToken(token);
+            }
+            setIsLoading(false);
+        };
+        loadStorageData();
+    }, []);
 
     return (
         <AuthContext.Provider value={{ login, logout, isLoading, userToken, user, signUp }}>

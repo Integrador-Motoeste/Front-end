@@ -81,4 +81,19 @@ export default class UserService {
             return error.response;
         }
     }
+
+    async turn_pilot(){
+        try{
+            const response = await this.axiosClient.get(`${this.baseUrl}turn_user_pilot/`, {
+                headers: {
+                    Authorization: `Bearer ${this.authToken}`,
+                }
+            })
+            return response
+        }catch (error: any){
+            console.error("Error turning user into pilot", error.message);
+            return error.response;
+        }
+    }
+
 }
