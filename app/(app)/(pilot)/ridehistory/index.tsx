@@ -3,6 +3,8 @@ import {ScrollView, Text, View} from 'react-native';
 import { style } from "./styles";
 import {MaterialIcons} from '@expo/vector-icons';
 import {RideCardHistory} from '../../../../components/ridecard/index'
+import Button from "@/components/Button";
+import { router } from "expo-router";
 
 export default function RideHistory (){
     return (
@@ -42,30 +44,7 @@ export default function RideHistory (){
                     price="25,00"
                     status={false}
                     />
-                    <RideCardHistory
-                    origin="Rua das Flores, Bairro Jardim, São Paulo /SP"
-                    destination="Shopping Center Paulista"
-                    price="25,00"
-                    status={false}
-                    />
-                    <RideCardHistory
-                    origin="Rua das Flores, Bairro Jardim, São Paulo /SP"
-                    destination="Shopping Center Paulista"
-                    price="25,00"
-                    status={false}
-                    />
-                    <RideCardHistory
-                    origin="Rua das Flores, Bairro Jardim, São Paulo /SP"
-                    destination="Shopping Center Paulista"
-                    price="25,00"
-                    status={false}
-                    />
-                    <RideCardHistory
-                    origin="Rua treze de Maio, Centro, Pau dos Ferros /RN"
-                    destination="Instituto Federal de Educação, Ciência e Tecnologia"
-                    price="12,50"
-                    status={true}
-                    />
+                    <Button title="Ver mais" onPress={() => {router.replace(('/(pilot)/payments/15'))}}/>
                 </View>
                 </ScrollView>
         </View>

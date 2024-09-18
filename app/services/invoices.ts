@@ -99,7 +99,7 @@ export default class InvoiceService {
     }
 
     async get_qr_code(id: number){
-        const url = `transactions/get_qr_code`
+        const url = `/api/transactions/get_qr_code`
         try{
             const response = await this.axiosClient.post(url, {id: id},{
                 headers: {

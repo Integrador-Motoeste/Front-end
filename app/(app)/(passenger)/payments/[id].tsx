@@ -28,7 +28,7 @@ export default function PaymentPassenger(){
     const invoiceService = new InvoiceService(userToken as string)
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()
-    const [isLoading, setIsLoafing] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)	
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
@@ -50,16 +50,25 @@ export default function PaymentPassenger(){
     // Pega a fatura da corrida
     async function updateInvoice(){
         const response = await invoiceService.get_invoice(2)
-        if (response.status === 200){
+        if (response.status == 200){
             setInvoice(response.data)
         }
     }
 
     const fetchInvoice = async () => {
+        setIsLoading(true)
         const response = await invoiceService.get_invoice_by_ride_id(id)
         if(response.status === 200){
             setInvoice(response.data)
+            const data = response.data
+            if (data.external_id == null) {
+                await invoiceService.process_payment(data.id)
+                
+                const updated_invoice = await invoiceService.get_invoice_by_ride_id(id)
+                setInvoice(updated_invoice.data)
+            }            
         }
+        console.log(invoice)
     }
 
     // Processa a fatura
@@ -70,8 +79,11 @@ export default function PaymentPassenger(){
 
     // Pega o QRCode da fatura
     async function get_qrcode(){
-        const response = await invoiceService.get_qr_code(2)
-        setQrcode(response.data)
+        if(invoice){
+            const response = await invoiceService.get_qr_code(invoice?.id)
+            setQrcode(response.data)
+            setIsLoading(false)
+        }
     }
 
     // Copia o payload para a área de transferência
@@ -83,6 +95,10 @@ export default function PaymentPassenger(){
         fetchInvoice();
     },[])
 
+    useEffect(() => {
+        get_qrcode()
+    }, [invoice])
+
     return (
         <SafeAreaView style={{flex: 1}}>
             <StatusBar style="auto"/>
@@ -93,28 +109,29 @@ export default function PaymentPassenger(){
             </Header>
                 {qrcode?.encodedImage && (
                 <Container>
-                    <InstructionText>
-                    {isFinished ?
-                        ("Confirmado! Obrigado por utilizar nossos serviços."):
-                        ("Sua corrida foi finalizada! É possível realizar o pagamento com o código PIX abaixo.")}
-                    </InstructionText>
-                    <ValueContainer>
-                        <ValueLabel>
-                            Valor
-                        </ValueLabel>
-                        <Value>
-                            {to_br_real(invoice?.value || 0)}
-                        </Value>
-                    </ValueContainer>
                     { isLoading ? (
                             <Spinner size={100} color="#1FD87F"/>
-                        ) : isFinished ? (
-                            <View style={{
-                                margin: 20,
-                            }}>
-                                <CheckIcon/>
-                            </View>
-                        ) : (
+                    ) : isFinished ? (
+                        <View style={{
+                            margin: 20,
+                        }}>
+                            <CheckIcon/>
+                        </View>
+                    ) : (
+                        <>
+                            <InstructionText>
+                                {isFinished ?
+                                    ("Confirmado! Obrigado por utilizar nossos serviços."):
+                                    ("Sua corrida foi finalizada! É possível realizar o pagamento com o código PIX abaixo.")}
+                            </InstructionText>
+                            <ValueContainer>
+                                <ValueLabel>
+                                    Valor
+                                </ValueLabel>
+                                <Value>
+                                    {to_br_real(invoice?.value || 0)}
+                                </Value>
+                            </ValueContainer>
                             <PixContainer>
                                 <PixLabel>
                                     Chave PIX
@@ -126,7 +143,8 @@ export default function PaymentPassenger(){
                                     <CopyPastIcon/>
                                 </PixInputContainer>
                             </PixContainer>
-                        )
+                        </>
+                    )
                     }
                 </Container>
                 )}
