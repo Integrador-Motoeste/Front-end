@@ -68,7 +68,6 @@ export default function PaymentPassenger(){
                 setInvoice(updated_invoice.data)
             }            
         }
-        console.log(invoice)
     }
 
     // Processa a fatura
@@ -80,6 +79,9 @@ export default function PaymentPassenger(){
     // Pega o QRCode da fatura
     async function get_qrcode(){
         if(invoice){
+            if (invoice && invoice.status == 'completed'){
+                setIsFinished(true)
+            }
             const response = await invoiceService.get_qr_code(invoice?.id)
             setQrcode(response.data)
             setIsLoading(false)
@@ -96,6 +98,10 @@ export default function PaymentPassenger(){
     },[])
 
     useEffect(() => {
+        connectSocket();
+    },[])
+
+    useEffect(() => {
         get_qrcode()
     }, [invoice])
 
@@ -107,23 +113,24 @@ export default function PaymentPassenger(){
                     <HeaderName>Pagamento</HeaderName>
                 </TouchableOpacity>
             </Header>
-                {qrcode?.encodedImage && (
                 <Container>
                     { isLoading ? (
                             <Spinner size={100} color="#1FD87F"/>
                     ) : isFinished ? (
-                        <View style={{
-                            margin: 20,
-                        }}>
-                            <CheckIcon/>
-                        </View>
-                    ) : (
                         <>
                             <InstructionText>
                                 {isFinished ?
                                     ("Confirmado! Obrigado por utilizar nossos serviços."):
                                     ("Sua corrida foi finalizada! É possível realizar o pagamento com o código PIX abaixo.")}
                             </InstructionText>
+                            <View style={{
+                                margin: 20,
+                            }}>
+                                <CheckIcon/>
+                            </View>
+                        </>
+                    ) : (
+                        <>
                             <ValueContainer>
                                 <ValueLabel>
                                     Valor
@@ -147,7 +154,6 @@ export default function PaymentPassenger(){
                     )
                     }
                 </Container>
-                )}
         </SafeAreaView>
     )
 }

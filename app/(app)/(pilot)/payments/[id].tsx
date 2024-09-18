@@ -32,7 +32,7 @@ export default function PaymentPilot (){
     const [qrcode, setQrcode] = useState<QRCodeType>()	
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)
-    const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [socket, setSocket] = useState<any>(null);
 
 
     const connectSocket = () => {
@@ -44,12 +44,22 @@ export default function PaymentPilot (){
     }
 
     const sendConfirmation = async () => {
-        const message = JSON.stringify({
-            type: 'confirmation',
-            ride_id: id,
-        })
-        await socket?.send(message)
-    }
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+                type: 'confirmation',
+                ride_id: id,
+            });
+            try {
+                await socket.send(message);
+                setIsFinished(true);
+            } catch (error) {
+                console.error("Error sending confirmation:", error);
+            }
+        } else {
+            console.error("Websocket is not open");
+        }
+    };
+
 
     // Pega a fatura da corrida
     async function updateInvoice(){
@@ -68,6 +78,9 @@ export default function PaymentPilot (){
     // Pega o QRCode da fatura
     async function get_qrcode(){
         if(invoice){
+            if (invoice && invoice.status == 'completed'){
+                setIsFinished(true)
+            }
             const response = await invoiceService.get_qr_code(invoice?.id)
             setQrcode(response.data)
             setIsLoading(false)
@@ -99,6 +112,10 @@ export default function PaymentPilot (){
     },[])
 
     useEffect(() => {
+        connectSocket();
+    },[])
+
+    useEffect(() => {
         get_qrcode()
     }, [invoice])
 
@@ -114,11 +131,18 @@ export default function PaymentPilot (){
                     { isLoading ? (
                             <Spinner size={100} color="#1FD87F"/>
                         ) : isFinished ? (
-                            <View style={{
-                                margin: 20,
-                            }}>
-                                <CheckIcon/>
-                            </View>
+                            <>
+                                <InstructionText>
+                                    {isFinished ?
+                                    ("Confirmado! Obrigado por utilizar nossos serviços."):
+                                    ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
+                                </InstructionText>
+                                <View style={{
+                                    margin: 20,
+                                }}>
+                                    <CheckIcon/>
+                                </View>
+                            </>
                         ) : (
                             <>
                                 <InstructionText>
