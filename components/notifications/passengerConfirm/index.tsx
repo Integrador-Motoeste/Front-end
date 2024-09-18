@@ -34,7 +34,6 @@ export function PassengerNotification(props : pilotProps) {
 
     const fetchPilot = async () => {
         const response = await user_service.get_pilot(props.pilotId);
-        console.log(response.data);
         if (response && response.status === 200){
             setPilot(response.data);
         }

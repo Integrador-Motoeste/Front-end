@@ -15,6 +15,10 @@ import { PassengerNotification } from "@/components/notifications/passengerConfi
 import { router } from "expo-router";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
+import ridesService, { RideCreate } from "@/app/services/rides";
+import GoogleMapsService from "@/app/services/google";
+
+
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
@@ -38,6 +42,9 @@ export default function Map({onRide}: mapsProps) {
     const [socket, setSocket] = useState<any>(null);
     const [hasPilot, setHasPilot] = useState(false);
     const [pilotId, setPilotId] = useState<any>(null);
+    const ride_service = new ridesService(userToken as string);
+    const google_service = new GoogleMapsService();
+
 
     // BEGIN QUEUE SOCKET
     const connectSocket = async () => {
@@ -118,6 +125,9 @@ export default function Map({onRide}: mapsProps) {
             remove_coords();
             socket.close();
             setIsConfirmed(false);
+            setPilotId(null);
+            setHasPilot(false);
+            setIsConfirmed(false);
         }
     };
 
@@ -138,16 +148,48 @@ export default function Map({onRide}: mapsProps) {
     const acceptPilot = async () => {
         if (socket) {
 
-            /// WILL CALL CREATE RIDE HERE THEN SEND TO PILOT
-            const message = JSON.stringify({
-                type: "confirm_pilot",
-                ride_id: 5,
-                pilot_id: pilotId,
-                response: true
-            });
-            await socket.send(message);
-            setHasPilot(false);
-            onRide();
+            const originText = await google_service.getPlaceFromCoordinates(origin.latitude, origin.longitude);
+            const destinationText = await google_service.getPlaceFromCoordinates(destination.lat, destination.lng);
+
+            const newRide: RideCreate = {
+                distance: parseFloat(distance.replace(" km", "").replace(",", ".")), 
+                duration: parseFloat(duration.replace("h", "").replace("min", "").replace(",", ".")),
+                pilot: pilotId,
+                passenger: user?.id as number,
+                start_lat: origin.latitude,
+                start_lng: origin.longitude,
+                end_lat: destination.lat,
+                end_lng: destination.lng,
+                origin: originText,
+                destination: destinationText,
+                status: "started",
+            };
+
+            console.log(newRide)
+
+            const response = await ride_service.createRide(newRide);
+
+            if (response.status === 201) {
+                const message = JSON.stringify({
+                    type: "confirm_pilot",
+                    ride_id: response.data.id,
+                    pilot_id: pilotId,
+                    response: true
+                });
+                await socket.send(message);
+                setHasPilot(false);
+                onRide();
+            }else{
+                const message = JSON.stringify({
+                    type: "confirm_pilot",
+                    ride_id: 0,
+                    pilot_id: pilotId,
+                    response: false
+                });
+                await socket.send(message);
+                Alert.alert("Erro", "Não foi possível confirmar a corrida. Tente novamente.");
+                cancelRide();
+            }
         }
     }
     //// END QUEUE SOCKET

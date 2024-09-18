@@ -1,12 +1,10 @@
 import { api } from "./api";
 
 export interface Ride{
-    id: number;
-    value: number;
     distance: number;
     duration: number;
-    pilot_id: number;
-    passenger_id: number;
+    pilot: number;
+    client: number;
     start_lat : number;
     start_lng : number;
     end_lat : number;
@@ -14,6 +12,23 @@ export interface Ride{
     time_start: string;
     time_end: string;
     stop_place?: string;
+    origin?: string;
+    destination?: string;
+    status: "created" | "started" | "finished" | "canceled";
+}
+
+
+export interface RideCreate{
+    distance: number;
+    duration: number;
+    pilot: number;
+    passenger: number;
+    start_lat : number;
+    start_lng : number;
+    end_lat : number;
+    end_lng : number;
+    origin?: string;
+    destination?: string;
     status: "created" | "started" | "finished" | "canceled";
 }
 
@@ -28,7 +43,7 @@ export default class ridesService {
       this.authToken = authToken;
     }
 
-    async createRide(data: Ride){
+    async createRide(data: RideCreate){
         try{
             const response = await this.axiosClient.post(this.baseUrl, data, {
                 headers: {
