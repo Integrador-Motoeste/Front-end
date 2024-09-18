@@ -1,6 +1,7 @@
 import { api } from "./api";
 
 export interface Ride{
+    id: number;
     distance: number;
     duration: string;
     pilot: number;

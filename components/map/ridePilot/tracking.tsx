@@ -48,7 +48,7 @@ export default function RidePilotExecution() {
                 setIsBoarded(true);
             }
             else if (data.type == 'finish_ride'){
-                router.replace('/(passenger)/payments/5')
+                router.replace(`/(pilot)/payments/${ride?.id}`)
             }
         }
     }

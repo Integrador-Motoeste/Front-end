@@ -15,12 +15,17 @@ import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
 import { useLocalSearchParams } from "expo-router";
 
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import { Ride } from "@/app/services/rides";
+
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 
 export default function PaymentPassenger(){
+    const { userToken, user } = useContext(AuthContext);
     const { id } = useLocalSearchParams()
-    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
+    const invoiceService = new InvoiceService(userToken as string)
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()
     const [isLoading, setIsLoafing] = useState<boolean>(false)
@@ -50,6 +55,13 @@ export default function PaymentPassenger(){
         }
     }
 
+    const fetchInvoice = async () => {
+        const response = await invoiceService.get_invoice_by_ride_id(id)
+        if(response.status === 200){
+            setInvoice(response.data)
+        }
+    }
+
     // Processa a fatura
     async function process_invoice(){
         const response = await invoiceService.process_payment(2)
@@ -68,9 +80,7 @@ export default function PaymentPassenger(){
     };
 
     useEffect(() => {
-        connectSocket()
-        updateInvoice()
-        get_qrcode()
+        fetchInvoice();
     },[])
 
     return (

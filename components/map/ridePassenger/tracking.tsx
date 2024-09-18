@@ -47,7 +47,7 @@ export default function RidePassengerExecution() {
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
             if (data.type == 'finish_ride'){
-                router.replace('/(passenger)/payments/5')
+                router.replace(`/(passenger)/payments/${ride?.id}`)
             }
             else if (data.type == 'pilot_position'){
                 setPilotCoords({

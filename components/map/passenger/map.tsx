@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import ridesService, { RideCreate } from "@/app/services/rides";
+import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
 import GoogleMapsService from "@/app/services/google";
 
 
@@ -33,10 +34,12 @@ export default function Map({onRide}: mapsProps) {
     const [isTypingOrigin, setIsTypingOrigin] = useState(false);
     const [isTypingDestination, setIsTypingDestination] = useState(false);
     const mapRef = useRef<any>(null);
+    const invoice_service = new InvoiceService(userToken as string);
 
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number | string>(0);
+    const [price, setPrice] = useState<number>(0);
+    const [priceText, setPriceText] = useState<string>("");
 
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
@@ -100,7 +103,7 @@ export default function Map({onRide}: mapsProps) {
                 info: {
                     distance: distance,
                     duration: duration,
-                    price: price,
+                    price: priceText,
                 }
             });
             socket.send(message); 
@@ -168,15 +171,39 @@ export default function Map({onRide}: mapsProps) {
             const response = await ride_service.createRide(newRide);
 
             if (response.status === 201) {
-                const message = JSON.stringify({
-                    type: "confirm_pilot",
-                    ride_id: response.data.id,
-                    pilot_id: pilotId,
-                    response: true
-                });
-                await socket.send(message);
-                setHasPilot(false);
-                onRide();
+                
+                const invoice: InvoiceCreate = {
+                    payment_type: "PIX",
+                    status: "pending",
+                    value: price,
+                    user: user?.id as number,
+                    pilot: pilotId,
+                    ride: response.data.id,
+                };
+                const invoiceResponse = await invoice_service.createInvoice(invoice);
+
+                if (invoiceResponse.status === 201) {
+                        const message = JSON.stringify({
+                            type: "confirm_pilot",
+                            ride_id: response.data.id,
+                            pilot_id: pilotId,
+                            response: true
+                        });
+                        await socket.send(message);
+                        setHasPilot(false);
+                        onRide();                    
+                }else{
+                    const message = JSON.stringify({
+                        type: "confirm_pilot",
+                        ride_id: response.data.id,
+                        pilot_id: pilotId,
+                        response: false,
+                        cancel_type: "invoice"
+                    });
+                    await socket.send(message);
+                    Alert.alert("Erro", "Não foi possível confirmar a corrida. Tente novamente.");
+                    cancelRide();
+                }
             }else{
                 const message = JSON.stringify({
                     type: "confirm_pilot",
@@ -250,8 +277,9 @@ export default function Map({onRide}: mapsProps) {
                         .replace(" minuto", "min");
                         setDuration(duration);
 
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(to_br_real(price));
+                        const raw_price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
+                        setPrice(parseFloat(raw_price))
+                        setPriceText(to_br_real(raw_price));
                     } else {
                         console.error("Error fetching distance data");
                     }
@@ -362,7 +390,7 @@ export default function Map({onRide}: mapsProps) {
                             }}>
                                 <Badge value={distance}></Badge>
                                 <Badge value={duration}></Badge>
-                                <Badge color={"#34C17D"} value={price}></Badge>
+                                <Badge color={"#34C17D"} value={priceText}></Badge>
                             </View>
                             <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
                         </View>
