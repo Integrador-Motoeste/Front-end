@@ -15,6 +15,9 @@ import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
 import { useLocalSearchParams } from "expo-router";
 
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
+
 export default function PaymentPassenger(){
     const { id } = useLocalSearchParams()
     const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
@@ -25,7 +28,7 @@ export default function PaymentPassenger(){
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);

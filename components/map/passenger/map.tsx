@@ -299,7 +299,7 @@ export default function Map({onRide}: mapsProps) {
 
     
         { hasPilot ?
-            <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
+            <PassengerNotification pilotId={pilotId} token={userToken as string} accept={acceptPilot} decline={declinePilot}/>
         : isConfirmed ? (
             <SearchingPop visible={isConfirmed} onCancel={() => cancelRide()} message="Procurando pilotos disponíveis..."/>
         ) :

@@ -17,6 +17,7 @@ import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 import Button from "@/components/Button";
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 export default function PaymentPilot (){
     const { id } = useLocalSearchParams()
@@ -29,7 +30,7 @@ export default function PaymentPilot (){
 
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);

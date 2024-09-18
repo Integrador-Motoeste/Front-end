@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
 
         const response = await authService.login(data)
-
         if (response && response.status === 200) {
             setUserToken(response.data.access);
             setUserRefreshToken(response.data.refresh);
