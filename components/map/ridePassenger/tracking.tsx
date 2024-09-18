@@ -86,6 +86,7 @@ export default function RidePassengerExecution() {
         const response = await rides_service.get_active_ride();
         if (response && response.status === 200) {
           setRide(response.data);
+          setIsBoarded(response.data.is_boarded);
         }
     }
 

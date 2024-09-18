@@ -12,7 +12,6 @@ import { AuthContext } from '@/context/AuthContext';
 export default function TabOneScreen() {
   const [hasRide, setHasRide] = useState(false);
   const { userToken, isLoading, user } = useContext(AuthContext);
-  const [ride, setRide] = useState(null);
 
   const service = new ridesService(userToken as string);
 
@@ -20,8 +19,6 @@ export default function TabOneScreen() {
     const fetchRide = async () => {
       const response = await service.get_active_ride();
       if (response && response.status === 200) {
-        console.log(response.data);
-        setRide(response.data);
         setHasRide(true);
       }
     }
