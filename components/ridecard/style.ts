@@ -59,4 +59,14 @@ export const style = StyleSheet.create({
         color: '#D81F1F',
         borderColor: '#D81F1F',
       },
+
+      inprogress : {
+        color: 'orange',
+        borderColor: 'orange',
+      },
+
+      created : {
+        color: '#1FA0D8',
+        borderColor: '#1FA0D8',
+      },
 })

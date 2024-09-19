@@ -51,4 +51,9 @@ export const style = StyleSheet.create({
         padding: 20,
       },
 
+    noRidesText: {    
+    fontSize: 18,   
+    color: 'gray',        
+    marginTop: 20,},
+
 })
