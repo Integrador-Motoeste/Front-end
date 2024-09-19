@@ -30,7 +30,7 @@ export default function RidePilotExecution() {
 
     const [position, setPosition] = useState<any>(null)
     const [isBoarded, setIsBoarded] = useState(false);
-
+    const isMounted = useRef(true);
     const [socket, setSocket] = useState<any>(null);
 
     // BEGIN SOCKET
@@ -90,18 +90,22 @@ export default function RidePilotExecution() {
     }, [])
 
     useEffect(() => {
-        if (ride && position) {
+        if (ride && position && user) {
             if(isBoarded){
                 setTimeout(() => {
-                    mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
-                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    });
+                    if(mapRef.current){
+                        mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                        });
+                    }
                 }, 0);
             }else{
                 setTimeout(() => {
-                    mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
-                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    });
+                    if(mapRef.current){
+                        mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                        });
+                    }
                 }, 0);
             }
         }
@@ -125,6 +129,10 @@ export default function RidePilotExecution() {
             );
         };
         watchPosition();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, []); 
     
     

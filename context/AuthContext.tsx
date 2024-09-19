@@ -41,6 +41,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [userToken, setUserToken] = useState<string | null>(null);
     const [userRefreshToken, setUserRefreshToken] = useState<string | null>(null);
 
+    const redirect_to_app = (user: UserInterface) => {
+        if (user?.groups.includes(2)) {
+            router.replace("(app)/(pilot)");
+        } else {
+            router.replace("(app)/(passenger)");
+        }
+    }
+
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         console.log("Fazendo login no context...");
@@ -56,11 +64,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
             setIsLoading(false);
-            if (response.data.user.groups.includes(2)) {
-                router.replace("(app)/(pilot)");
-            } else {
-                router.replace("(app)/(passenger)");
-            }
+
+            AsyncStorage.setItem("userToken", response.data.access);
+            AsyncStorage.setItem("userRefreshToken", response.data.refresh);
+            AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+
+            redirect_to_app(response.data.user);
         } else {
             console.error("Erro ao fazer login: Resposta inesperada", response);
             router.replace("/");
@@ -69,7 +78,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const signUp = async (email: string, password1: string, password2: string, first_name: string, last_name: string) => {
         setIsLoading(true);
-        console.log("Fazendo login no context...");
         const authService = new AuthService("");
         
         const data = {
@@ -91,10 +99,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
     const logout = async () => {
-      const authService = new AuthService({ userToken } as unknown as string);
-      const response = await authService.logout()
-      if (response && response.status === 200) {
-        console.log("Logout feito com sucesso");
+        const authService = new AuthService({ userToken } as unknown as string);
+        const response = await authService.logout();
+        if (response && response.status === 200) {
         setIsLoading(true)
         AsyncStorage.removeItem("userToken");
         setUser(null);
@@ -102,16 +109,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUserRefreshToken(null);
         setIsLoading(false);
         router.replace("/(app)")
-        } else {
+    } else {
             console.error("Erro ao fazer logout: Resposta inesperada", response);
         }
     }
 
     useEffect(() => {
         const loadStorageData = async () => {
+            const user = await AsyncStorage.getItem("user");
             const token = await AsyncStorage.getItem("userToken");
-            if (token) {
+            const refreshToken = await AsyncStorage.getItem("userRefreshToken");
+            if (user) {
                 setUserToken(token);
+                setUser(JSON.parse(user));
+                setUserRefreshToken(refreshToken);
+
+                redirect_to_app(JSON.parse(user));
             }
             setIsLoading(false);
         };

@@ -63,7 +63,7 @@ export default class AuthService {
     async logout() {
       const url = `${this.baseUrl}logout/`;
       try {
-        const response = await this.axiosClient.post(url, {}, {
+        const response = await this.axiosClient.post(url, {
           headers: {
             Authorization: `Bearer ${this.authToken}`,
           },
