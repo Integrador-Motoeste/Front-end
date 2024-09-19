@@ -10,6 +10,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import { Redirect, Stack } from 'expo-router';
+import PasswordInput from '@/components/PasswordInput';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,12 +38,7 @@ export default function AppLogin() {
           placeholder="Email"
           onChangeText={(email: string) => setEmailAddress(email)}
         />
-        <Input
-          value={password}
-          placeholder="Senha"
-          secureTextEntry={true}
-          onChangeText={(password: string) => setPassword(password)}
-        />
+        <PasswordInput password={password} setPassword={setPassword}></PasswordInput>
         <ContainerButtons>
           <Button title="Entrar" onPress={() => { login(emailAddress, password)}} />
           <ButtonOutLine
