@@ -18,18 +18,26 @@ import { useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 import Button from "@/components/Button";
 
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import { Ride } from "@/app/services/rides";
+import { router } from "expo-router";
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
 export default function PaymentPilot (){
     const { id } = useLocalSearchParams()
-    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
+    const { userToken, user } = useContext(AuthContext);
+
+    const invoiceService = new InvoiceService(userToken as string)
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()	
-    const [isLoading, setIsLoafing] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)
-    const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [socket, setSocket] = useState<any>(null);
 
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
@@ -37,12 +45,22 @@ export default function PaymentPilot (){
     }
 
     const sendConfirmation = async () => {
-        const message = JSON.stringify({
-            type: 'confirmation',
-            ride_id: id,
-        })
-        await socket?.send(message)
-    }
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+                type: 'confirmation',
+                ride_id: id,
+            });
+            try {
+                await socket.send(message);
+                setIsFinished(true);
+            } catch (error) {
+                console.error("Error sending confirmation:", error);
+            }
+        } else {
+            console.error("Websocket is not open");
+        }
+    };
+
 
     // Pega a fatura da corrida
     async function updateInvoice(){
@@ -60,8 +78,14 @@ export default function PaymentPilot (){
 
     // Pega o QRCode da fatura
     async function get_qrcode(){
-        const response = await invoiceService.get_qr_code(2)
-        setQrcode(response.data)
+        if(invoice){
+            if (invoice && invoice.status == 'completed'){
+                setIsFinished(true)
+            }
+            const response = await invoiceService.get_qr_code(invoice?.id)
+            setQrcode(response.data)
+            setIsLoading(false)
+        }
     }
 
     // Copia o payload para a área de transferência
@@ -69,11 +93,32 @@ export default function PaymentPilot (){
         Clipboard.setString(qrcode?.payload || " ");
     };
 
+    const fetchInvoice = async () => {
+        setIsLoading(true)
+        const response = await invoiceService.get_invoice_by_ride_id(id)
+        if(response.status === 200){
+            setInvoice(response.data)
+            const data = response.data
+            if (data.external_id == null) {
+                await invoiceService.process_payment(data.id)
+                
+                const updated_invoice = await invoiceService.get_invoice_by_ride_id(id)
+                setInvoice(updated_invoice.data)
+            }            
+        }
+    }
+
     useEffect(() => {
-        connectSocket()
-        updateInvoice()
-        get_qrcode()
+        fetchInvoice();
     },[])
+
+    useEffect(() => {
+        connectSocket();
+    },[])
+
+    useEffect(() => {
+        get_qrcode()
+    }, [invoice])
 
     return (
         <SafeAreaView style={{flex: 1}}>
@@ -83,38 +128,46 @@ export default function PaymentPilot (){
                     <HeaderName>Pagamento</HeaderName>
                 </TouchableOpacity>
             </Header>
-                {qrcode?.encodedImage && (
                 <Container>
-                    <InstructionText>
-                        {isFinished ?
-                        ("Confirmado! Obrigado por utilizar nossos serviços."):
-                        ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
-                    </InstructionText>
-                    <ValueContainer>
-                        <ValueLabel>
-                            Valor
-                        </ValueLabel>
-                        <Value>
-                            {to_br_real(invoice?.value || 0)}
-                        </Value>
-                    </ValueContainer>
                     { isLoading ? (
                             <Spinner size={100} color="#1FD87F"/>
                         ) : isFinished ? (
-                            <View style={{
-                                margin: 20,
-                            }}>
-                                <CheckIcon/>
-                            </View>
+                            <>
+                                <InstructionText>
+                                    {isFinished ?
+                                    ("Confirmado! Obrigado por utilizar nossos serviços."):
+                                    ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
+                                </InstructionText>
+                                <View style={{
+                                    margin: 20,
+                                }}>
+                                    <CheckIcon/>
+                                </View>
+                                <Button title="Voltar" onPress={() => {router.replace('/(app)/(pilot)')}}/>
+                            </>
                         ) : (
-                            <QRImage
-                                source={{uri: `data:image/png;base64,${qrcode?.encodedImage}`}}
-                            />
+                            <>
+                                <InstructionText>
+                                    {isFinished ?
+                                    ("Confirmado! Obrigado por utilizar nossos serviços."):
+                                    ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
+                                </InstructionText>
+                                <ValueContainer>
+                                    <ValueLabel>
+                                        Valor
+                                    </ValueLabel>
+                                    <Value>
+                                        {to_br_real(invoice?.value || 0)}
+                                    </Value>
+                                </ValueContainer>
+                                <QRImage
+                                    source={{uri: `data:image/png;base64,${qrcode?.encodedImage}`}}
+                                />
+                                <Button onPress={sendConfirmation} title="Confirmar pagamento"/>
+                            </>
                         )
                     }
-                <Button onPress={sendConfirmation} title="Confirmar pagamento"/>
                 </Container>
-                )}
         </SafeAreaView>
     )
 }

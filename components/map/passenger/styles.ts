@@ -7,7 +7,6 @@ export const style = StyleSheet.create({
     },
     map: {
         ...StyleSheet.absoluteFillObject,
-        width: "100%",
         height: "100%",
         borderBottomRightRadius: 25,
         position: "relative",
@@ -16,7 +15,8 @@ export const style = StyleSheet.create({
     mapContainer: {
         width: '100%',
         height: '85%',
-        borderRadius: 30,
+        borderBottomRightRadius: 25,
+        borderBottomLeftRadius: 25,
         backgroundColor: 'black',
         overflow: 'hidden',
     },

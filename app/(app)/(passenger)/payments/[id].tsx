@@ -13,19 +13,28 @@ import { to_br_real } from "@/components/utils/to-real";
 import CopyPastIcon from "@/assets/SVG/copypaste";
 import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import { Ride } from "@/app/services/rides";
+import Button from "@/components/Button";
+
+const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
+
 
 export default function PaymentPassenger(){
+    const { userToken, user } = useContext(AuthContext);
     const { id } = useLocalSearchParams()
-    const invoiceService = new InvoiceService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2MDE3MjQ3LCJpYXQiOjE3MjYwMTYzNDcsImp0aSI6IjI1ZWY3MDQxZTNhODQ1OWJiZGY1NTEwNGQyOThkNjVjIiwidXNlcl9pZCI6MX0.ZEn2XT1uBGLmHHLLfcGh40gFPOr2-mS870BoCVmHNqA")
+    const invoiceService = new InvoiceService(userToken as string)
     const [invoice, setInvoice] = useState<InvoiceType>()
     const [qrcode, setQrcode] = useState<QRCodeType>()
-    const [isLoading, setIsLoafing] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)	
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
     const connectSocket = () => {
-        const socket = new WebSocket(`ws://192.168.0.9:8000/ws/payments/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
@@ -42,8 +51,23 @@ export default function PaymentPassenger(){
     // Pega a fatura da corrida
     async function updateInvoice(){
         const response = await invoiceService.get_invoice(2)
-        if (response.status === 200){
+        if (response.status == 200){
             setInvoice(response.data)
+        }
+    }
+
+    const fetchInvoice = async () => {
+        setIsLoading(true)
+        const response = await invoiceService.get_invoice_by_ride_id(id)
+        if(response.status === 200){
+            setInvoice(response.data)
+            const data = response.data
+            if (data.external_id == null) {
+                await invoiceService.process_payment(data.id)
+                
+                const updated_invoice = await invoiceService.get_invoice_by_ride_id(id)
+                setInvoice(updated_invoice.data)
+            }            
         }
     }
 
@@ -55,8 +79,14 @@ export default function PaymentPassenger(){
 
     // Pega o QRCode da fatura
     async function get_qrcode(){
-        const response = await invoiceService.get_qr_code(2)
-        setQrcode(response.data)
+        if(invoice){
+            if (invoice && invoice.status == 'completed'){
+                setIsFinished(true)
+            }
+            const response = await invoiceService.get_qr_code(invoice?.id)
+            setQrcode(response.data)
+            setIsLoading(false)
+        }
     }
 
     // Copia o payload para a área de transferência
@@ -65,10 +95,16 @@ export default function PaymentPassenger(){
     };
 
     useEffect(() => {
-        connectSocket()
-        updateInvoice()
-        get_qrcode()
+        fetchInvoice();
     },[])
+
+    useEffect(() => {
+        connectSocket();
+    },[])
+
+    useEffect(() => {
+        get_qrcode()
+    }, [invoice])
 
     return (
         <SafeAreaView style={{flex: 1}}>
@@ -78,30 +114,33 @@ export default function PaymentPassenger(){
                     <HeaderName>Pagamento</HeaderName>
                 </TouchableOpacity>
             </Header>
-                {qrcode?.encodedImage && (
                 <Container>
-                    <InstructionText>
-                    {isFinished ?
-                        ("Confirmado! Obrigado por utilizar nossos serviços."):
-                        ("Sua corrida foi finalizada! É possível realizar o pagamento com o código PIX abaixo.")}
-                    </InstructionText>
-                    <ValueContainer>
-                        <ValueLabel>
-                            Valor
-                        </ValueLabel>
-                        <Value>
-                            {to_br_real(invoice?.value || 0)}
-                        </Value>
-                    </ValueContainer>
                     { isLoading ? (
                             <Spinner size={100} color="#1FD87F"/>
-                        ) : isFinished ? (
+                    ) : isFinished ? (
+                        <>
+                            <InstructionText>
+                                {isFinished ?
+                                    ("Confirmado! Obrigado por utilizar nossos serviços."):
+                                    ("Sua corrida foi finalizada! É possível realizar o pagamento com o código PIX abaixo.")}
+                            </InstructionText>
                             <View style={{
                                 margin: 20,
                             }}>
                                 <CheckIcon/>
                             </View>
-                        ) : (
+                            <Button title="Voltar" onPress={() => {router.replace('/(app)/(passenger)')}}/>
+                        </>
+                    ) : (
+                        <>
+                            <ValueContainer>
+                                <ValueLabel>
+                                    Valor
+                                </ValueLabel>
+                                <Value>
+                                    {to_br_real(invoice?.value || 0)}
+                                </Value>
+                            </ValueContainer>
                             <PixContainer>
                                 <PixLabel>
                                     Chave PIX
@@ -113,10 +152,10 @@ export default function PaymentPassenger(){
                                     <CopyPastIcon/>
                                 </PixInputContainer>
                             </PixContainer>
-                        )
+                        </>
+                    )
                     }
                 </Container>
-                )}
         </SafeAreaView>
     )
 }

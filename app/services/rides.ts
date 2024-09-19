@@ -1,12 +1,11 @@
 import { api } from "./api";
 
-interface Ride{
+export interface Ride{
     id: number;
-    value: number;
     distance: number;
-    duration: number;
-    pilot_id: number;
-    passenger_id: number;
+    duration: string;
+    pilot: number;
+    client: number;
     start_lat : number;
     start_lng : number;
     end_lat : number;
@@ -14,6 +13,23 @@ interface Ride{
     time_start: string;
     time_end: string;
     stop_place?: string;
+    origin?: string;
+    destination?: string;
+    status: "created" | "started" | "finished" | "canceled";
+}
+
+
+export interface RideCreate{
+    distance: number;
+    duration: string;
+    pilot: number;
+    passenger: number;
+    start_lat : number;
+    start_lng : number;
+    end_lat : number;
+    end_lng : number;
+    origin?: string;
+    destination?: string;
     status: "created" | "started" | "finished" | "canceled";
 }
 
@@ -28,7 +44,7 @@ export default class ridesService {
       this.authToken = authToken;
     }
 
-    async createRide(data: Ride){
+    async createRide(data: RideCreate){
         try{
             const response = await this.axiosClient.post(this.baseUrl, data, {
                 headers: {
@@ -57,8 +73,8 @@ export default class ridesService {
         }
     }
 
-    async get_ride_by_user(id: number){
-        const url = `${this.baseUrl}rides_by_passenger?passenger_id=${id}`
+    async get_rides(){
+        const url = `${this.baseUrl}my_rides/`
         try{
             const response = await this.axiosClient.get(url, {
                 headers: {
@@ -72,8 +88,8 @@ export default class ridesService {
         }
     }
 
-    async get_active_ride_by_user(id: number){
-        const url = `${this.baseUrl}active_rides_by_passenger?passenger_id=${id}`
+    async get_active_ride(){
+        const url = `${this.baseUrl}get_active_ride/`
         try{
             const response = await this.axiosClient.get(url, {
                 headers: {
