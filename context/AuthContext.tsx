@@ -1,10 +1,8 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import AuthService from "@/app/services/auth";
-import axios from "axios";
 import { router } from "expo-router";
 import { Float } from "react-native/Libraries/Types/CodegenTypes";
-import { Use } from "react-native-svg";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface UserInterface {
     id: number;
@@ -43,6 +41,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [userToken, setUserToken] = useState<string | null>(null);
     const [userRefreshToken, setUserRefreshToken] = useState<string | null>(null);
 
+    const redirect_to_app = (user: UserInterface) => {
+        if (user?.groups.includes(2)) {
+            router.replace("(app)/(pilot)");
+        } else {
+            router.replace("(app)/(passenger)");
+        }
+    }
+
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         console.log("Fazendo login no context...");
@@ -58,11 +64,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
             setIsLoading(false);
-            if (response.data.user.groups.includes(2)) {
-                router.replace("(app)/(pilot)");
-            } else {
-                router.replace("(app)/(passenger)");
-            }
+
+            AsyncStorage.setItem("userToken", response.data.access);
+            AsyncStorage.setItem("userRefreshToken", response.data.refresh);
+            AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+
+            redirect_to_app(response.data.user);
         } else {
             console.error("Erro ao fazer login: Resposta inesperada", response);
             router.replace("/");
@@ -71,8 +78,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const signUp = async (email: string, password1: string, password2: string, first_name: string, last_name: string) => {
         setIsLoading(true);
-        console.log("Fazendo login no context...");
         const authService = new AuthService("");
+        
         const data = {
           'email': email,
           'password1': password1,
@@ -84,19 +91,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const response = await authService.signUpUser(data)
 
         if (response && response.status === 201) {
-            router.replace("/");
+            login(email, password1);
         } else {
             console.error("Erro ao fazer cadastro: Resposta inesperada", response);
             router.replace("/");
         }
       }
 
-    const logout = () => {
+    const logout = async () => {
+        const authService = new AuthService({ userToken } as unknown as string);
+        const response = await authService.logout();
+        if (response && response.status === 200) {
+        setIsLoading(true)
+        AsyncStorage.removeItem("userToken");
         setUser(null);
         setUserToken(null);
         setUserRefreshToken(null);
-        router.replace("/(app)");
+        setIsLoading(false);
+        router.replace("/(app)")
+    } else {
+            console.error("Erro ao fazer logout: Resposta inesperada", response);
+        }
     }
+
+    useEffect(() => {
+        const loadStorageData = async () => {
+            const user = await AsyncStorage.getItem("user");
+            const token = await AsyncStorage.getItem("userToken");
+            const refreshToken = await AsyncStorage.getItem("userRefreshToken");
+            if (user) {
+                setUserToken(token);
+                setUser(JSON.parse(user));
+                setUserRefreshToken(refreshToken);
+
+                redirect_to_app(JSON.parse(user));
+            }
+            setIsLoading(false);
+        };
+        loadStorageData();
+    }, []);
 
     return (
         <AuthContext.Provider value={{ login, logout, isLoading, userToken, user, signUp }}>

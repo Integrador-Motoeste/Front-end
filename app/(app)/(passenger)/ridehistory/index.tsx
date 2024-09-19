@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useContext, useState, useCallback } from 'react';
 import { ScrollView, Text, View, ActivityIndicator } from 'react-native';
 import { style } from "./styles";
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,11 +21,10 @@ export default function RideHistory() {
     const getRidesByUser = async () => {
         try {
             const response = await rideService.get_rides();
-
-            console.log("Resposta da API de rides:", response);
+            //console.log("Resposta da API de rides:", response);
 
             if (response?.data) {
-                const ridesData = response.data; 
+                const ridesData = response.data;
                 setRides(ridesData);
 
                 if (ridesData.length > 0) {
@@ -37,7 +37,6 @@ export default function RideHistory() {
                     setInvoices(invoicesResult);
                 }
             } else {
-                console.warn("Nenhuma corrida encontrada.");
                 setRides([]);
             }
         } catch (error) {
@@ -47,11 +46,13 @@ export default function RideHistory() {
         }
     };
 
-    useEffect(() => {
-        if (userToken) {
-            getRidesByUser();
-        }
-    }, [userToken]);
+    useFocusEffect(
+        useCallback(() => {
+            if (userToken) {
+                getRidesByUser();
+            }
+        }, [userToken])
+    );
 
     return (
         <View style={style.container}>

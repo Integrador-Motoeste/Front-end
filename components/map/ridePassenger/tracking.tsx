@@ -98,16 +98,20 @@ export default function RidePassengerExecution() {
     useEffect(() => {
         if (ride && pilotCoords) {
             if(isBoarded){
-                setTimeout(() => {
-                    mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
-                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    });
-                }, 0);
+                if(mapRef.current){
+                    setTimeout(() => {
+                        mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                        });
+                    }, 0);
+                }
             }else{
                 setTimeout(() => {
-                    mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
-                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    });
+                    if(mapRef.current){
+                        mapRef.current.fitToSuppliedMarkers(["pilot", "origin"], {
+                            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                        });
+                    }
                 }, 0);
             }
         }
