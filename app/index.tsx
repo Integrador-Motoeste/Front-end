@@ -22,7 +22,7 @@ export default function AppLogin() {
 
   return (
     <Container>
-      <StatusBar style="auto" />
+      <StatusBar style="auto" backgroundColor='#1FD87F'/>
       <Header>
         <Logo>MOTOCAR</Logo>
       </Header>

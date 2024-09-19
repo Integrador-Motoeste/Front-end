@@ -44,7 +44,6 @@ export default function RideHistory (){
                     price="25,00"
                     status={false}
                     />
-                    <Button title="Ver mais" onPress={() => {router.replace(('/(pilot)/payments/15'))}}/>
                 </View>
                 </ScrollView>
         </View>

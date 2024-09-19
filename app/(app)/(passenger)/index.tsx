@@ -31,7 +31,7 @@ export default function TabOneScreen() {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar style="auto"/>
+      <StatusBar backgroundColor='#1FD87F'/>
       { hasRide ? (
         <RidePassengerExecution></RidePassengerExecution>
       ):(
