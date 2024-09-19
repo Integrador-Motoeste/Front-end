@@ -253,9 +253,11 @@ export default function Map({onRide}: mapsProps) {
     useEffect(() => {
         if (origin && destination) {
             setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
+                if(mapRef.current){
+                    mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }
             }, 0);
         }
     }, [origin, destination]);

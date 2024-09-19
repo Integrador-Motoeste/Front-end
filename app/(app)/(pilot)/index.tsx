@@ -31,9 +31,8 @@ export default function TabTwoScreen() {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar style="auto"/>
+      <StatusBar style="auto" backgroundColor=''/>
       { hasRide ? (
-        //Passar corrida ativa por props
         <RidePilotExecution></RidePilotExecution>
       ):(
         <Map onRide={() => onRideRequest()}></Map>
