@@ -51,18 +51,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
 
         const response = await authService.login(data)
-
         if (response && response.status === 200) {
             setUserToken(response.data.access);
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
-            AsyncStorage.setItem("userToken", response.data.access);
-            console.log("Login feito com sucesso:", response.data.user);
-
-            if (response.data.user.groups[0] === 1) {
-              router.replace("(app)/(passenger)");
+            setIsLoading(false);
+            if (response.data.user.groups.includes(2)) {
+                router.replace("(app)/(pilot)");
             } else {
-              router.replace("(app)/(pilot)");
+                router.replace("(app)/(passenger)");
             }
         } else {
             console.error("Erro ao fazer login: Resposta inesperada", response);
@@ -104,6 +101,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUserToken(null);
         setUserRefreshToken(null);
         setIsLoading(false);
+        router.replace("/(app)")
         } else {
             console.error("Erro ao fazer logout: Resposta inesperada", response);
         }

@@ -2,17 +2,17 @@ import { api } from "./api";
 
 export type InvoiceCreate = {
     payment_type: "PIX" | "CREDIT_CARD";
-    status: "PENDING" | "RECEIVED" | "CONFIRMED" | "CANCELED";
+    status: "completed" | "pending" | "canceled";
     value: number;
-    pilot_id: number;
-    client_id: number;
-    ride_id: number;
+    user: number;
+    pilot: number;
+    ride: number;
 }
 
 export type InvoiceType = {
     id: number;
     payment_type: "PIX" | "CREDIT_CARD";
-    status: "PENDING" | "RECEIVED" | "CONFIRMED" | "CANCELED";
+    status: "completed" | "pending" | "canceled";
     value: number;
     pilot_id: number;
     client_id: number;
@@ -68,8 +68,23 @@ export default class InvoiceService {
         }
     }
 
+    async get_invoice_by_ride_id(id: number | string | string[]){
+        const url = `api/invoices/get_invoice_by_ride_id?id=${id}`
+        try{
+            const response = await this.axiosClient.get(url, {
+                headers: {
+                    Authorization: `Bearer ${this.authToken}`,
+                }
+            })
+            return response
+        }catch (error: any){
+            console.log("Error getting invoice", error);
+            return error.response;
+        }
+    }
+
     async process_payment(id: number){
-        const url = `transactions/process_payment`
+        const url = `/api/transactions/process_payment`
         try{
             const response = await this.axiosClient.post(url, {id: id},{
                 headers: {
@@ -84,7 +99,7 @@ export default class InvoiceService {
     }
 
     async get_qr_code(id: number){
-        const url = `transactions/get_qr_code`
+        const url = `/api/transactions/get_qr_code`
         try{
             const response = await this.axiosClient.post(url, {id: id},{
                 headers: {

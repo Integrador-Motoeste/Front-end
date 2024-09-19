@@ -96,4 +96,14 @@ export default class UserService {
         }
     }
 
+
+    async get_pilot(id: number){
+        try{
+            const response = await this.axiosClient.get(`${this.baseUrl}get_pilot_info?id=${id}`)
+            return response
+        }catch (error: any){
+            console.error("Error signing in user", error.message);
+            return error.response;
+        }
+    }
 }

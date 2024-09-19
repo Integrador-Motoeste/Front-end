@@ -12,27 +12,23 @@ import { useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 import { router } from "expo-router";
 
+
+import ridesService from "@/app/services/rides";
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import { Ride } from "@/app/services/rides";
+
+
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 
-const temp_origin = {
-    latitude : -6.0882835,
-    longitude: -38.372192,
-}
-
-
-const temp_destination = {
-    lat : -6.112170799999999,
-    lng: -38.2065018,
-}
-
-
 export default function RidePassengerExecution() {
-    const [id, setId] = useState<any>(5);
+    const { userToken, isLoading, user } = useContext(AuthContext);
 
-    const [origin, setOrigin] = useState<any>(null)
-    const [destination, setDestination] = useState<any>(null)
+    const rides_service = new ridesService(userToken as string);
+    const [ride, setRide] = useState<Ride | null>(null);
+
     const mapRef = useRef<any>(null);
 
     const [pilotCoords, setPilotCoords] = useState<any>(null);
@@ -43,7 +39,7 @@ export default function RidePassengerExecution() {
     // BEGIN SOCKET
 
     const connectSocket = () => {
-        const socket = new WebSocket(`${ws_base_url}/ws/rides/${id}/`)
+        const socket = new WebSocket(`${ws_base_url}/ws/rides/${ride?.id}/`)
 
         socket.onopen = () => {
             setSocket(socket);
@@ -51,7 +47,7 @@ export default function RidePassengerExecution() {
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
             if (data.type == 'finish_ride'){
-                router.replace('/(passenger)/payments/5')
+                router.replace(`/(passenger)/payments/${ride?.id}`)
             }
             else if (data.type == 'pilot_position'){
                 setPilotCoords({
@@ -64,22 +60,20 @@ export default function RidePassengerExecution() {
 
     useEffect(() => {
         connectSocket();
-        setOrigin(temp_origin);
-        setDestination(temp_destination);
 
         return () => {
             if (socket) {
                 socket.close();
             }
         };
-    }, [])
+    }, [ride])
 
     const confirm_boarding = () => {
         setIsBoarded(true);
         if (socket){
             const message = JSON.stringify({
                 type: 'confirm_boarding',
-                ride_id: id,
+                ride_id: ride?.id,
             })
             socket.send(message);
         }
@@ -88,8 +82,21 @@ export default function RidePassengerExecution() {
     //// END SOCKET
 
 
+    const fetchRide = async () => {
+        const response = await rides_service.get_active_ride();
+        if (response && response.status === 200) {
+          setRide(response.data);
+          setIsBoarded(response.data.is_boarded);
+        }
+    }
+
     useEffect(() => {
-        if (origin && destination && pilotCoords) {
+        fetchRide();
+    }, [])
+
+
+    useEffect(() => {
+        if (ride && pilotCoords) {
             if(isBoarded){
                 setTimeout(() => {
                     mapRef.current.fitToSuppliedMarkers(["pilot", "destination"], {
@@ -104,41 +111,39 @@ export default function RidePassengerExecution() {
                 }, 0);
             }
         }
-    }, [[origin, destination, pilotCoords]]);
+    }, [[ride, pilotCoords]]);
     
     return (
         <View style={style.container}>
-            {origin && (
+            {ride && (
                 <View style={style.mapContainer}>
                     <MapView
                         ref={mapRef}
                         style={style.map}
                         initialRegion={{
-                            latitude: origin.latitude,
-                            longitude: origin.longitude,
+                            latitude: ride?.start_lat as number,
+                            longitude: ride?.start_lng as number,
                             latitudeDelta: 0.0922,
                             longitudeDelta: 0.0421,
                         }}
                     >
                         <Marker
                             coordinate={{
-                                latitude: origin.latitude,
-                                longitude: origin.longitude,
+                                latitude: ride?.start_lat as number,
+                                longitude: ride?.start_lng as number,
                             }}
                             identifier="origin"
                             title="Origem"
                         ></Marker>
-                        {destination && (
-                            <Marker
-                                coordinate={{
-                                    latitude: destination.lat,
-                                    longitude: destination.lng,
-                                }}
-                                identifier="destination"
-                                title="Destino"
-                                pinColor="#1FD87F"
-                            ></Marker>
-                        )}
+                        <Marker
+                            coordinate={{
+                                latitude: ride?.end_lat as number,
+                                longitude: ride?.end_lng as number,
+                            }}
+                            identifier="destination"
+                            title="Destino"
+                            pinColor="#1FD87F"
+                        ></Marker>
                         {pilotCoords && (
                             <Marker
                                 coordinate={{
@@ -151,15 +156,15 @@ export default function RidePassengerExecution() {
                             ></Marker>
                         )}
 
-                        {origin && destination && (
+                        {ride && (
                             <MapViewDirections
                                 origin={{
-                                    latitude: origin.latitude,
-                                    longitude: origin.longitude,
+                                    latitude: ride?.start_lat as number,
+                                    longitude: ride?.start_lng as number,
                                 }}
                                 destination={{
-                                    latitude: destination.lat,
-                                    longitude: destination.lng,
+                                    latitude: ride?.end_lat as number,
+                                    longitude: ride?.end_lng as number,
                                 }}
                                 apikey={google_key}
                                 strokeWidth={5}

@@ -2,13 +2,14 @@ import { AuthContext } from '@/context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useContext } from 'react';
 import Styled from 'styled-components/native';
-
-
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '@/context/AuthContext';
+import { useContext } from 'react';
 export default function ExitButton() {
-    const { logout } = useContext(AuthContext);
+    const { logout } = useContext(AuthContext); 
 
     return (
-        <Button onPress={() => logout()}>
+        <Button onPress={() => {logout()}}>
             <Ionicons name="exit-outline" size={22} color="#c41b1b" />
             <Text>Sair</Text>
         </Button>
