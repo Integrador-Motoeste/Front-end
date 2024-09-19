@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUserToken(response.data.access);
             setUserRefreshToken(response.data.refresh);
             setUser(response.data.user);
+            setIsLoading(false);
             if (response.data.user.groups.includes(2)) {
                 router.replace("(app)/(pilot)");
             } else {
@@ -94,6 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(null);
         setUserToken(null);
         setUserRefreshToken(null);
+        router.replace("/(app)");
     }
 
     return (

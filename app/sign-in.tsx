@@ -42,7 +42,6 @@ export default function AppLogin() {
         <ContainerButtons>
           <Button title="Entrar" onPress={() => { login(emailAddress, password)}} />
           <ButtonOutLine
-            isLoading={isLoading}
             onPress={() => {}}
             icon="logo-google"
             title="Entrar com o Google"
