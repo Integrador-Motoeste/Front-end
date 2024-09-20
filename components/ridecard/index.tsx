@@ -46,8 +46,10 @@ export const RideCardHistory: React.FC<RideCardProps> = ({ origin, destination, 
   };
 
   const formatPrice = (price: number) => {
+    if (!price) return '0,00';
     return price.toFixed(2).replace('.', ',');
   };
+  
 
   return (
     <View style={style.card}>

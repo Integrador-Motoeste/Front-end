@@ -7,12 +7,12 @@ import { RideCardHistory } from '../../../../components/ridecard/index';
 import ridesService from "@/app/services/rides";
 import { AuthContext } from "@/context/AuthContext";
 import { Ride } from "@/app/services/rides";
-import InvoiceService, { InvoiceType } from "@/app/services/invoices";
+import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
 
 export default function RideHistory() {
     const [loading, setLoading] = useState(true);
     const [rides, setRides] = useState<Ride[]>([]);
-    const [invoices, setInvoices] = useState<InvoiceType[]>([]);
+    const [invoices, setInvoices] = useState<InvoiceCreate[]>([]);
     const { userToken } = useContext(AuthContext);
 
     const rideService = new ridesService(userToken || "");
@@ -21,19 +21,21 @@ export default function RideHistory() {
     const getRidesByUser = async () => {
         try {
             const response = await rideService.get_rides();
-            //console.log("Resposta da API de rides:", response);
-
+            
             if (response?.data) {
                 const ridesData = response.data;
                 setRides(ridesData);
-
+    
                 if (ridesData.length > 0) {
                     const invoicesPromises = ridesData.map(async (ride: Ride) => {
                         const invoiceResponse = await invoiceService.get_invoice_by_ride_id(ride.id);
-                        return invoiceResponse?.data?.invoice;
+                        console.log(`Invoice response for ride ${ride.id}:`, invoiceResponse?.data);
+    
+                        return invoiceResponse?.data?.invoice || invoiceResponse?.data;
                     });
-
+    
                     const invoicesResult = await Promise.all(invoicesPromises);
+                    console.log("Invoices result:", invoicesResult);
                     setInvoices(invoicesResult);
                 }
             } else {
@@ -87,13 +89,14 @@ export default function RideHistory() {
                             <Text style={style.noRidesText}>O Usuário não possui corridas</Text>
                         ) : (
                             rides.map((ride) => {
-                                const invoice = invoices.find(inv => inv?.ride_id === ride.id);
+                                const invoice = invoices.find(inv => inv?.ride === ride.id);
+                                
                                 return (
                                     <RideCardHistory
                                         key={ride.id}
                                         origin={ride.origin || "Origem não definida"}
                                         destination={ride.destination || "Destino não definido"}
-                                        value={invoice?.value || 0}
+                                        value={Number(invoice?.value) || 0}
                                         status={ride.status}
                                     />
                                 );
