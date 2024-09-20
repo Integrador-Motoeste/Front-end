@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useContext, useState, useCallback } from 'react';
-import { ScrollView, Text, View, ActivityIndicator } from 'react-native';
+import { ScrollView, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { style } from "./styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import { RideCardHistory } from '../../../../components/ridecard/index';
@@ -13,6 +13,7 @@ export default function RideHistory() {
     const [loading, setLoading] = useState(true);
     const [rides, setRides] = useState<Ride[]>([]);
     const [invoices, setInvoices] = useState<InvoiceCreate[]>([]);
+    const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const { userToken } = useContext(AuthContext);
 
     const rideService = new ridesService(userToken || "");
@@ -29,13 +30,10 @@ export default function RideHistory() {
                 if (ridesData.length > 0) {
                     const invoicesPromises = ridesData.map(async (ride: Ride) => {
                         const invoiceResponse = await invoiceService.get_invoice_by_ride_id(ride.id);
-                        console.log(`Invoice response for ride ${ride.id}:`, invoiceResponse?.data);
-    
                         return invoiceResponse?.data?.invoice || invoiceResponse?.data;
                     });
     
                     const invoicesResult = await Promise.all(invoicesPromises);
-                    console.log("Invoices result:", invoicesResult);
                     setInvoices(invoicesResult);
                 }
             } else {
@@ -80,6 +78,23 @@ export default function RideHistory() {
                 </View>
             </View>
 
+            <View style={style.filters}>
+                    <View style={style.filterButtons}>
+                        <TouchableOpacity onPress={() => setStatusFilter(null)}>
+                            <Text style={statusFilter === null ? style.activeFilter : style.filterButton}>Todos</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setStatusFilter('started')}>
+                            <Text style={statusFilter === 'started' ? style.activeFilter : style.filterButton}>Iniciada</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setStatusFilter('finished')}>
+                            <Text style={statusFilter === 'finished' ? style.activeFilter : style.filterButton}>Finalizada</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setStatusFilter('canceled')}>
+                            <Text style={statusFilter === 'canceled' ? style.activeFilter : style.filterButton}>Cancelada</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
             {loading ? (
                 <ActivityIndicator size="large" color="#1FD87F" />
             ) : (
@@ -88,19 +103,21 @@ export default function RideHistory() {
                         {rides.length === 0 ? (
                             <Text style={style.noRidesText}>O Usuário não possui corridas</Text>
                         ) : (
-                            rides.map((ride) => {
-                                const invoice = invoices.find(inv => inv?.ride === ride.id);
-                                
-                                return (
-                                    <RideCardHistory
-                                        key={ride.id}
-                                        origin={ride.origin || "Origem não definida"}
-                                        destination={ride.destination || "Destino não definido"}
-                                        value={Number(invoice?.value) || 0}
-                                        status={ride.status}
-                                    />
-                                );
-                            })
+                            rides
+                                .filter(ride => !statusFilter || ride.status === statusFilter)
+                                .map((ride) => {
+                                    const invoice = invoices.find(inv => inv?.ride === ride.id);
+                                    
+                                    return (
+                                        <RideCardHistory
+                                            key={ride.id}
+                                            origin={ride.origin || "Origem não definida"}
+                                            destination={ride.destination || "Destino não definido"}
+                                            value={Number(invoice?.value) || 0}
+                                            status={ride.status}
+                                        />
+                                    );
+                                })
                         )}
                     </View>
                 </ScrollView>
