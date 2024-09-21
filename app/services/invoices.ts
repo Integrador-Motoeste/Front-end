@@ -69,7 +69,7 @@ export default class InvoiceService {
     }
 
     async get_invoice_by_ride_id(id: number | string | string[]){
-        const url = `api/invoices/get_invoice_by_ride_id?id=${id}`
+        const url = `/api/invoices/get_invoice_by_ride_id?id=${id}`
         try{
             const response = await this.axiosClient.get(url, {
                 headers: {
