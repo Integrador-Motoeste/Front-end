@@ -112,4 +112,19 @@ export default class InvoiceService {
             return error.response;
         }
     }
+
+    async withdraw(value: number){
+        const url = `/api/transactions/withdraw`;
+        try{
+            const response = await this.axiosClient.post(url, {value: value},{
+                headers: {
+                    Authorization: `Bearer ${this.authToken}`,
+                }
+            })
+            return response
+        }catch (error: any){
+            console.log("Error with withdraw", error);
+            return error.response;
+        }
+    }
 }

@@ -18,6 +18,7 @@ export const TitleContext = styled.View`
   display: flex;
   align-items: baseline;
   flex-direction: row;
+  align-items: center;
 `;
 
 export const Title = styled.Text`
@@ -89,4 +90,31 @@ export const VehicleCard = styled.View`
   flex-direction: row;
   align-items: center;
   width: 100%;
+`;
+
+
+export const ButtonContainer = styled.View`
+  flex-direction: row;
+  width: 50%;
+  margin-top: 10px;
+  justify-content: flex-end;
+  gap: 6px;
+`;
+
+export const WithdrawContainer = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 75%;
+`;
+
+
+export const CurrencyInputContainer = styled.View`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: blue;
+  width: 90%;
+  height: 10%;
 `;
