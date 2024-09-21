@@ -12,7 +12,7 @@ type props = {
 export default function PixButton(props: props) {
 
     return (
-        <Button onPress={() => {props.onPress}}>
+        <Button onPress={() => {props.onPress()}}>
             <PixIcon width={22} height={22}/>
             <Text>Sacar</Text>
         </Button>

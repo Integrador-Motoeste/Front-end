@@ -11,7 +11,7 @@ import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
 
 export default function RideHistory() {
     const [loading, setLoading] = useState(true);
-    const [rides, setRides] = useState<Ride[]>([]);
+    const [rides, setRides] = useState<Ride[] | null>(null);
     const [invoices, setInvoices] = useState<InvoiceCreate[]>([]);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const { userToken } = useContext(AuthContext);
@@ -22,8 +22,7 @@ export default function RideHistory() {
     const getRidesByUser = async () => {
         try {
             const response = await rideService.get_rides();
-            
-            if (response?.data) {
+            if (response.status == 200) {
                 const ridesData = response.data;
                 setRides(ridesData);
     
@@ -37,7 +36,7 @@ export default function RideHistory() {
                     setInvoices(invoicesResult);
                 }
             } else {
-                setRides([]);
+                setRides(null);
             }
         } catch (error) {
             console.error("Erro ao obter rides ou invoices do usuário:", error);
@@ -51,6 +50,7 @@ export default function RideHistory() {
             if (userToken) {
                 getRidesByUser();
             }
+            console.log(rides);
         }, [userToken])
     );
 

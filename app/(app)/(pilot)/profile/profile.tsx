@@ -20,7 +20,7 @@ import { KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 export default function Profile() {
   const { user, userToken } = useContext(AuthContext);
   const baseURL = 'http://192.168.0.16:8000';
-  const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(true);
+  const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false);
   const invoice_service  = new InvoiceService(userToken as string);
   const [withDrawValue, setWithDrawValue] = useState<number|null>(0.0);
 
