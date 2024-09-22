@@ -121,6 +121,7 @@ export default class InvoiceService {
                     Authorization: `Bearer ${this.authToken}`,
                 }
             })
+            console.log(response.data, response.status)
             return response
         }catch (error: any){
             console.log("Error with withdraw", error);

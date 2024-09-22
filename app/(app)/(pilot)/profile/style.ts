@@ -1,5 +1,6 @@
 import styled from "styled-components/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import  Styled  from "styled-components/native";
 
 export const ContentProfile = styled.View`
   flex: 1;
@@ -101,12 +102,27 @@ export const ButtonContainer = styled.View`
   gap: 6px;
 `;
 
-export const WithdrawContainer = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  height: 75%;
+export const WithdrawModalContainer = styled.View`
+    flex: 1;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+`;
+
+export const WithdrawContentContainer = Styled.View`
+    width: 75%;
+    margin: 24px;
+    height: 300px;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+
+    elevation: 20;
+    border-radius: 15px;
 `;
 
 
@@ -114,7 +130,24 @@ export const CurrencyInputContainer = styled.View`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: blue;
   width: 90%;
-  height: 10%;
+  height: 50px;
+`;
+
+
+export const InstructionText = Styled.Text`
+    text-align: center;
+    font-size: 16px;
+    color: #7D7D7D;
+    font-family: 'Inter_600SemiBold';
+    width: 80%;
+`;
+
+
+export const WithdrawButtons = Styled.View`
+    display: flex;
+    justifyContent: space-around;
+    flexDirection: row;
+    width: 100%;
+    margin: 8px;
 `;

@@ -279,7 +279,7 @@ export default function Map({onRide}: mapsProps) {
                         .replace(" minuto", "min");
                         setDuration(duration);
 
-                        const raw_price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
+                        const raw_price = (data.rows[0].elements[0].distance.value * 0.00210 + 1.99).toFixed(2);
                         setPrice(parseFloat(raw_price))
                         setPriceText(to_br_real(raw_price));
                     } else {

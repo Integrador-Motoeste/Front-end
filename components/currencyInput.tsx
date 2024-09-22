@@ -10,7 +10,7 @@ interface CustomProps extends CurrencyInputProps{
 }
 
 
-export function CustomCurrencyInput({prefix, delimiter, separator, precision, minValue, ...rest}: CustomProps) {
+export function CustomCurrencyInput({prefix, delimiter, separator, precision, ...rest}: CustomProps) {
 
     return (
             <Container>
@@ -19,7 +19,6 @@ export function CustomCurrencyInput({prefix, delimiter, separator, precision, mi
                     delimiter="."
                     separator=","
                     precision={2}
-                    minValue={0}
                     {...rest}
                     style={{
                         

@@ -55,10 +55,8 @@ export const Container = styled(SafeAreaView)`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100%;
     background-color: #ffffff;
     position: relative;
-    width: 100%;
     flex: 1;
 `;
 

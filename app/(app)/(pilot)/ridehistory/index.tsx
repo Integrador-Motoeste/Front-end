@@ -8,6 +8,8 @@ import ridesService from "@/app/services/rides";
 import { AuthContext } from "@/context/AuthContext";
 import { Ride } from "@/app/services/rides";
 import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
+import Button from '@/components/Button';
+import { router } from 'expo-router';
 
 export default function RideHistory() {
     const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ export default function RideHistory() {
                         </TouchableOpacity>
                     </View>
                 </View>
-
+            <Button title="Voltar" onPress={() => {router.replace('(pilot)/payments/6')}}/>
             {loading ? (
                 <ActivityIndicator size="large" color="#1FD87F" />
             ) : (

@@ -16,7 +16,7 @@ const GradientContainer = styled(LinearGradient).attrs({
   end: { x: 1, y: 1 },
 })`
   width: 100%;
-  height: 22%;
+  height: 175px;
   padding: 5%;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
