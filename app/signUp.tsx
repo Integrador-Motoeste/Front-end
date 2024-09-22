@@ -14,6 +14,7 @@ export default function SignUp() {
   const [rePassword, setRePassword] = useState('');
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [cpf, setCpf] = useState('');
   const { signUp } = useContext(AuthContext);
 
   return (
@@ -28,17 +29,18 @@ export default function SignUp() {
           <Input outline={true} value={name} placeholder="Nome" onChangeText={(value) => setName(value)}/>
           <Input outline={true} value={lastName} placeholder="Sobrenome" onChangeText={(value) => setLastName(value)} />
           <Input outline={true} value={emailAddress} placeholder="Email" onChangeText={(value) => setEmailAddress(value)} />
+          <Input outline={true} value={cpf} placeholder="CPF" onChangeText={(value) => setCpf(value)} />
           <PasswordInput outline={true} password={password} setPassword={setPassword}></PasswordInput>
           <PasswordInput outline={true} password={rePassword} setPassword={setRePassword}></PasswordInput>
 
           <ContainerButtons>
               <Button title="Cadastrar" onPress={() => {
-                  signUp(emailAddress, password, rePassword, name, lastName);
+                  signUp(emailAddress, password, rePassword, name, lastName, cpf);
                 }} />
               <ButtonOutLine
                 isLoading={isLoading}
                 onPress={() => {
-                  signUp(emailAddress, password, rePassword, name, lastName);
+                  signUp(emailAddress, password, rePassword, name, lastName, cpf);
                 }}
                 icon="logo-google"
                 title="Cadastrar com o Google"
