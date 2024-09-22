@@ -23,7 +23,7 @@ interface UserInterface {
 export const AuthContext = createContext({
     login: (email: string, password: string) => { },
     logout: () => { },
-    signUp: (email: string, password1: string, password2: string, first_name: string, last_name: string) => { },
+    signUp: (email: string, password1: string, password2: string, first_name: string, last_name: string, cpf: string) => { },
     isLoading: true,
     userToken: null as string | null,
     user: null as UserInterface | null,
@@ -43,9 +43,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const redirect_to_app = (user: UserInterface) => {
         if (user?.groups.includes(2)) {
-            router.replace("(app)/(pilot)");
+            router.replace("/(app)/(pilot)");
         } else {
-            router.replace("(app)/(passenger)");
+            router.replace("/(app)/(passenger)");
         }
     }
 
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       };
 
-    const signUp = async (email: string, password1: string, password2: string, first_name: string, last_name: string) => {
+    const signUp = async (email: string, password1: string, password2: string, first_name: string, last_name: string, cpf: string) => {
         setIsLoading(true);
         const authService = new AuthService("");
         
@@ -85,7 +85,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           'password1': password1,
           'password2': password2,
           'first_name': first_name,
-          'last_name': last_name
+          'last_name': last_name,
+          'cpf': cpf,
         }
 
         const response = await authService.signUpUser(data)
