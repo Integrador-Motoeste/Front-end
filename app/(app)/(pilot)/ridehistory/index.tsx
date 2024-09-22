@@ -8,10 +8,12 @@ import ridesService from "@/app/services/rides";
 import { AuthContext } from "@/context/AuthContext";
 import { Ride } from "@/app/services/rides";
 import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
+import Button from '@/components/Button';
+import { router } from 'expo-router';
 
 export default function RideHistory() {
     const [loading, setLoading] = useState(true);
-    const [rides, setRides] = useState<Ride[]>([]);
+    const [rides, setRides] = useState<Ride[] | null>(null);
     const [invoices, setInvoices] = useState<InvoiceCreate[]>([]);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const { userToken } = useContext(AuthContext);
@@ -22,8 +24,7 @@ export default function RideHistory() {
     const getRidesByUser = async () => {
         try {
             const response = await rideService.get_rides();
-            
-            if (response?.data) {
+            if (response.status == 200) {
                 const ridesData = response.data;
                 setRides(ridesData);
     
@@ -37,7 +38,7 @@ export default function RideHistory() {
                     setInvoices(invoicesResult);
                 }
             } else {
-                setRides([]);
+                setRides(null);
             }
         } catch (error) {
             console.error("Erro ao obter rides ou invoices do usuário:", error);
@@ -51,6 +52,7 @@ export default function RideHistory() {
             if (userToken) {
                 getRidesByUser();
             }
+            console.log(rides);
         }, [userToken])
     );
 
@@ -94,15 +96,16 @@ export default function RideHistory() {
                         </TouchableOpacity>
                     </View>
                 </View>
-
             {loading ? (
                 <ActivityIndicator size="large" color="#1FD87F" />
             ) : (
                 <ScrollView>
                     <View style={style.content}>
-                        {rides.length === 0 ? (
+                        {!rides ? (
+                            <Text style={style.noRidesText}>Falha ao carregar corridas</Text>
+                        ) : rides.length === 0 ?
                             <Text style={style.noRidesText}>O Usuário não possui corridas</Text>
-                        ) : (
+                        : (
                             rides
                                 .filter(ride => !statusFilter || ride.status === statusFilter)
                                 .map((ride) => {
