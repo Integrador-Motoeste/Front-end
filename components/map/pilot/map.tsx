@@ -87,6 +87,7 @@ export default function Map({onRide}: MapProps) {
                     setIsSearching(true);
                     setPassengerId(null);
                 }else if (data.response === true){
+                    socket.close();
                     onRide();
                 }
             }

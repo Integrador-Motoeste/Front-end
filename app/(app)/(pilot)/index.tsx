@@ -26,14 +26,20 @@ export default function TabTwoScreen() {
   }, [])
 
   const onRideRequest = () => {
-    setHasRide(true);
+    if (hasRide === true) {
+      setHasRide(false);
+    }else{
+      setHasRide(true);
+    }
   }
+
+
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto" backgroundColor=''/>
       { hasRide ? (
-        <RidePilotExecution></RidePilotExecution>
+        <RidePilotExecution onRide={() => onRideRequest()}></RidePilotExecution>
       ):(
         <Map onRide={() => onRideRequest()}></Map>
       )}

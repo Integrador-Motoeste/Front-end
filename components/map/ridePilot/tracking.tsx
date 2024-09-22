@@ -19,8 +19,11 @@ import { Ride } from "@/app/services/rides";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
+type props = {
+    onRide: () => void;
+}
 
-export default function RidePilotExecution() {
+export default function RidePilotExecution(props: props){ 
     const { userToken, isLoading, user } = useContext(AuthContext);
 
     const rides_service = new ridesService(userToken as string);
@@ -48,6 +51,8 @@ export default function RidePilotExecution() {
                 setIsBoarded(true);
             }
             else if (data.type == 'finish_ride'){
+                socket.close();
+                props.onRide();
                 router.replace(`/(pilot)/payments/${ride?.id}`)
             }
         }

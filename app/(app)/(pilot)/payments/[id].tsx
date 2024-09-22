@@ -22,6 +22,9 @@ import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
 import { router } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
 export default function PaymentPilot (){
@@ -42,6 +45,16 @@ export default function PaymentPilot (){
         socket.onopen = () => {
             setSocket(socket);
         }
+    }
+
+    const finish = () => {
+        socket?.close();
+        setIsLoading(false);
+        setIsFinished(false);
+        setQrcode(undefined);
+        setInvoice(undefined);
+        
+        router.replace('/(app)/(pilot)')
     }
 
     const sendConfirmation = async () => {
@@ -108,16 +121,26 @@ export default function PaymentPilot (){
         }
     }
 
-    useEffect(() => {
-        fetchInvoice();
-    },[])
+    useFocusEffect(
+        useCallback(() => {
+            setIsLoading(false);
+            setIsFinished(false);
+            setQrcode(undefined);
+            setInvoice(undefined);
+
+            fetchInvoice();
+            connectSocket();
+
+            return () => {
+                socket?.close();
+            };
+        }, [id])
+    );
 
     useEffect(() => {
-        connectSocket();
-    },[])
-
-    useEffect(() => {
-        get_qrcode()
+        if(invoice){
+            get_qrcode()
+        }
     }, [invoice])
 
     return (
@@ -143,7 +166,7 @@ export default function PaymentPilot (){
                                 }}>
                                     <CheckIcon/>
                                 </View>
-                                <Button title="Voltar" onPress={() => {router.replace('/(app)/(pilot)')}}/>
+                                <Button title="Voltar" onPress={finish}/>
                             </>
                         ) : (
                             <>
