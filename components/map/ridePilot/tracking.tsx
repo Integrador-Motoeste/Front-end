@@ -188,8 +188,8 @@ export default function RidePilotExecution(props: props){
                             isBoarded ? (
                                 <MapViewDirections
                                 origin={{
-                                    latitude: ride.start_lat as number,
-                                    longitude: ride.start_lng as number,
+                                    latitude: position.latitude,
+                                    longitude: position.longitude,
                                 }}
                                 destination={{
                                     latitude: ride.end_lat as number,

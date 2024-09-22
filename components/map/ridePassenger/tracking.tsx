@@ -165,19 +165,51 @@ export default function RidePassengerExecution(props: props){
                         )}
 
                         {ride && (
-                            <MapViewDirections
-                                origin={{
-                                    latitude: ride?.start_lat as number,
-                                    longitude: ride?.start_lng as number,
-                                }}
-                                destination={{
-                                    latitude: ride?.end_lat as number,
-                                    longitude: ride?.end_lng as number,
-                                }}
-                                apikey={google_key}
-                                strokeWidth={5}
-                                strokeColor="blue"
-                            />
+                            pilotCoords ? (
+                                isBoarded ? (
+                                    <MapViewDirections
+                                        origin={{
+                                            latitude: pilotCoords.latitude,
+                                            longitude: pilotCoords.longitude,
+                                        }}
+                                        destination={{
+                                            latitude: ride?.end_lat as number,
+                                            longitude: ride?.end_lng as number,
+                                        }}
+                                        apikey={google_key}
+                                        strokeWidth={5}
+                                        strokeColor="blue"
+                                    />
+                                ):(
+                                    <MapViewDirections
+                                        origin={{
+                                            latitude: pilotCoords.latitude,
+                                            longitude: pilotCoords.longitude,
+                                        }}
+                                        destination={{
+                                            latitude: ride?.start_lat as number,
+                                            longitude: ride?.start_lng as number,
+                                        }}
+                                        apikey={google_key}
+                                        strokeWidth={5}
+                                        strokeColor="blue"
+                                    />
+                                )
+                            ):(
+                                <MapViewDirections
+                                    origin={{
+                                        latitude: ride.start_lat as number,
+                                        longitude: ride.start_lng as number,
+                                    }}
+                                    destination={{
+                                        latitude: ride?.end_lat as number,
+                                        longitude: ride?.end_lng as number,
+                                    }}
+                                    apikey={google_key}
+                                    strokeWidth={5}
+                                    strokeColor="blue"
+                                />
+                            )
                         )}
                     </MapView>
                 </View>
