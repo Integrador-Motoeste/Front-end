@@ -96,7 +96,6 @@ export default function RideHistory() {
                         </TouchableOpacity>
                     </View>
                 </View>
-            <Button title="Voltar" onPress={() => {router.replace('(pilot)/payments/6')}}/>
             {loading ? (
                 <ActivityIndicator size="large" color="#1FD87F" />
             ) : (
