@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import ridesService from '@/app/services/rides';
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
+import { router } from 'expo-router';
 
 export default function TabTwoScreen() {
   const [hasRide, setHasRide] = useState(false);
@@ -19,6 +20,9 @@ export default function TabTwoScreen() {
     const fetchRide = async () => {
       const response = await service.get_active_ride();
       if (response && response.status == 200) {
+        if (response.data.passenger === user?.id){
+          router.replace('/(app)/(passenger)')
+        }
         setHasRide(true);
       }
     }

@@ -13,7 +13,6 @@ import { router } from "expo-router";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 
-
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
