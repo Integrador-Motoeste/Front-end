@@ -17,6 +17,8 @@ import Button from '@/components/Button';
 import { ActivityIndicator } from 'react-native';
 import CheckIcon from '@/assets/SVG/check';
 import { to_br_real } from '@/components/utils/to-real';
+import { router } from 'expo-router';
+import ButtonOutLine from '@/components/ButtonOutLine';
 
 export default function Profile() {
   const { user, userToken } = useContext(AuthContext);
@@ -154,6 +156,11 @@ export default function Profile() {
               <SmallTextContent label='CPF' text={user?.cpf as string} />
               <SmallTextContent label='Email' text={user?.email as string} />
             </InfoGrid>
+        <ButtonOutLine 
+          title="Trocar para passageiro" 
+          onPress={() => {router.replace('/(app)/(passenger)')}}
+          margin='24px'
+        />
         </ContentProfile>
       </Container>
     </KeyboardAwareScrollView>

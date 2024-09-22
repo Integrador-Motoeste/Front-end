@@ -191,6 +191,7 @@ export default function Map({onRide}: mapsProps) {
                         });
                         await socket.send(message);
                         setHasPilot(false);
+                        socket.close();
                         onRide();                    
                 }else{
                     const message = JSON.stringify({

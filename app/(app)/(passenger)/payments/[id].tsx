@@ -19,6 +19,8 @@ import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
 import Button from "@/components/Button";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
@@ -46,6 +48,16 @@ export default function PaymentPassenger(){
                 setIsFinished(true);
             }
         }
+    }
+
+
+    const finish = () => {
+        socket?.close();
+        setIsLoading(false);
+        setIsFinished(false);
+        setQrcode(undefined);
+        
+        router.replace('/(app)/(passenger)')
     }
 
     // Pega a fatura da corrida
@@ -94,16 +106,26 @@ export default function PaymentPassenger(){
         Clipboard.setString(qrcode?.payload || " ");
     };
 
-    useEffect(() => {
-        fetchInvoice();
-    },[])
+    useFocusEffect(
+        useCallback(() => {
+            setIsLoading(false);
+            setIsFinished(false);
+            setQrcode(undefined);
+            setInvoice(undefined);
+
+            fetchInvoice();
+            connectSocket();
+
+            return () => {
+                socket?.close();
+            };
+        }, [id])
+    );
 
     useEffect(() => {
-        connectSocket();
-    },[])
-
-    useEffect(() => {
-        get_qrcode()
+        if(invoice){
+            get_qrcode()
+        }
     }, [invoice])
 
     return (
@@ -129,7 +151,7 @@ export default function PaymentPassenger(){
                             }}>
                                 <CheckIcon/>
                             </View>
-                            <Button title="Voltar" onPress={() => {router.replace('/(app)/(passenger)')}}/>
+                            <Button title="Voltar" onPress={finish}/>
                         </>
                     ) : (
                         <>

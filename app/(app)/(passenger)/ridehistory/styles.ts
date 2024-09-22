@@ -25,6 +25,7 @@ export const style = StyleSheet.create({
         flexDirection: 'row',
         marginTop: 10,
         marginRight: 50,
+        gap: 8,
     },
 
     filter: {

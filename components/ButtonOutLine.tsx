@@ -7,7 +7,8 @@ interface CustomButtonProps extends TouchableOpacityProps {
     onPress?: () => void;
     isLoading?: boolean
     icon?: keyof typeof Ionicons.glyphMap
-    }
+    margin?: string
+  }
 
 export default function ButtonOutLine({isLoading, onPress , title, icon, ...rest}: CustomButtonProps) {
   return (
@@ -32,9 +33,9 @@ const Text = Styled.Text`
     margin-left: 5px;
     `;
 
-const ButtonDefault = Styled.TouchableOpacity`
+const ButtonDefault = Styled.TouchableOpacity<CustomButtonProps>`
     border-radius: 47px;
-    margin: 10px;
+    margin: ${props => props.margin || "0px"};
     width: 297px;
     height: 47px;
     border: 2px solid #1FD87F;

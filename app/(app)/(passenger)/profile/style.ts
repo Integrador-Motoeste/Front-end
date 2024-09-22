@@ -5,6 +5,7 @@ export const ContentProfile = styled.View`
   flex: 1;
   width: 100%;
   padding: 0 5% 0 5%;
+  align-items: center;
 `;
 
 export const Container = styled(SafeAreaView)`

@@ -117,6 +117,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     useEffect(() => {
         const loadStorageData = async () => {
+            setIsLoading(true);
             const user = await AsyncStorage.getItem("user");
             const token = await AsyncStorage.getItem("userToken");
             const refreshToken = await AsyncStorage.getItem("userRefreshToken");
