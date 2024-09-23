@@ -49,8 +49,10 @@ export default function Profile() {
       </Header>
 
       <ContentProfile>
-        <BigTextContent label='Saldo' text={String(user?.balance)} />
-
+        
+        {user?.groups.includes(2) &&
+          <BigTextContent label='Saldo' text={String(user?.balance)}/>
+        }
         <InfoGrid>
           <SmallTextContent label='CPF' text={user?.cpf as string} />
           <SmallTextContent label='Email' text={user?.email as string} />

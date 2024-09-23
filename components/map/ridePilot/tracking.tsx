@@ -68,7 +68,7 @@ export default function RidePilotExecution(props: props){
                 destination: {lat: ride?.end_lat, lng: ride?.end_lng},
             }));
         }
-    }, [position, socket]);
+    }, [position]);
 
     useEffect(() => {
         connectSocket(); 
