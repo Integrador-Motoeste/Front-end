@@ -7,6 +7,8 @@ import ExitButton from '@/components/exitButton';
 import { Container, ContentProfile, InfoGrid, NameUser, ProfileImage, ProfileImageContainer, ProfileInfo, ProfileSection, Rating, Title, TitleContext } from './style';
 import { AuthContext } from '@/context/AuthContext';
 import { RatingService } from '@/app/services/rating';
+import ButtonOutLine from '@/components/ButtonOutLine';
+import { router } from 'expo-router';
 
 export default function Profile() {
   const { user, userToken } = useContext(AuthContext);
@@ -53,6 +55,12 @@ export default function Profile() {
           <SmallTextContent label='CPF' text={user?.cpf as string} />
           <SmallTextContent label='Email' text={user?.email as string} />
         </InfoGrid>
+        {user?.groups.includes(2) &&
+        <ButtonOutLine 
+        title="Trocar para Piloto" 
+        onPress={() => {router.replace('/(app)/(pilot)')}}
+        margin='20px'
+        />}
       </ContentProfile>
     </Container>
   );

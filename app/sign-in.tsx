@@ -11,6 +11,7 @@ import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import { Redirect, Stack } from 'expo-router';
 import PasswordInput from '@/components/PasswordInput';
+import { ActivityIndicator } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,6 +21,10 @@ export default function AppLogin() {
   const router = useRouter();
   const { user, login, isLoading } = useContext(AuthContext);
   const [isLogged, setIsLogged] = useState(true);	
+
+  if(isLoading){
+    return <ActivityIndicator size="large" color="#1FD87F" />
+  }
 
   return (
     <Container>

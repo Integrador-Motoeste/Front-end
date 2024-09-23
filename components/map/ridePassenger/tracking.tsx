@@ -22,8 +22,11 @@ import { Ride } from "@/app/services/rides";
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
+type props = {
+    onRide: () => void;
+}
 
-export default function RidePassengerExecution() {
+export default function RidePassengerExecution(props: props){ 
     const { userToken, isLoading, user } = useContext(AuthContext);
 
     const rides_service = new ridesService(userToken as string);
@@ -47,9 +50,10 @@ export default function RidePassengerExecution() {
         socket.onmessage = (event: any) => {
             const data = JSON.parse(event.data);
             if (data.type == 'finish_ride'){
+                props.onRide();
+                socket.close();
                 router.replace(`/(passenger)/payments/${ride?.id}`)
-            }
-            else if (data.type == 'pilot_position'){
+            }else if (data.type == 'pilot_position'){
                 setPilotCoords({
                     latitude: data.latitude,
                     longitude: data.longitude
@@ -161,19 +165,51 @@ export default function RidePassengerExecution() {
                         )}
 
                         {ride && (
-                            <MapViewDirections
-                                origin={{
-                                    latitude: ride?.start_lat as number,
-                                    longitude: ride?.start_lng as number,
-                                }}
-                                destination={{
-                                    latitude: ride?.end_lat as number,
-                                    longitude: ride?.end_lng as number,
-                                }}
-                                apikey={google_key}
-                                strokeWidth={5}
-                                strokeColor="blue"
-                            />
+                            pilotCoords ? (
+                                isBoarded ? (
+                                    <MapViewDirections
+                                        origin={{
+                                            latitude: pilotCoords.latitude,
+                                            longitude: pilotCoords.longitude,
+                                        }}
+                                        destination={{
+                                            latitude: ride?.end_lat as number,
+                                            longitude: ride?.end_lng as number,
+                                        }}
+                                        apikey={google_key}
+                                        strokeWidth={5}
+                                        strokeColor="blue"
+                                    />
+                                ):(
+                                    <MapViewDirections
+                                        origin={{
+                                            latitude: pilotCoords.latitude,
+                                            longitude: pilotCoords.longitude,
+                                        }}
+                                        destination={{
+                                            latitude: ride?.start_lat as number,
+                                            longitude: ride?.start_lng as number,
+                                        }}
+                                        apikey={google_key}
+                                        strokeWidth={5}
+                                        strokeColor="blue"
+                                    />
+                                )
+                            ):(
+                                <MapViewDirections
+                                    origin={{
+                                        latitude: ride.start_lat as number,
+                                        longitude: ride.start_lng as number,
+                                    }}
+                                    destination={{
+                                        latitude: ride?.end_lat as number,
+                                        longitude: ride?.end_lng as number,
+                                    }}
+                                    apikey={google_key}
+                                    strokeWidth={5}
+                                    strokeColor="blue"
+                                />
+                            )
                         )}
                     </MapView>
                 </View>

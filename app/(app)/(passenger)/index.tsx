@@ -15,10 +15,11 @@ export default function TabOneScreen() {
 
   const service = new ridesService(userToken as string);
 
+
   useEffect(() => {
     const fetchRide = async () => {
       const response = await service.get_active_ride();
-      if (response && response.status === 200) {
+      if (response && response.status == 200) {
         setHasRide(true);
       }
     }
@@ -26,14 +27,20 @@ export default function TabOneScreen() {
   }, [])
 
   const onRideRequest = () => {
-    setHasRide(true);
+    if (hasRide === true) {
+      setHasRide(false);
+    }else{
+      setHasRide(true);
+    }
   }
+
+
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar backgroundColor='#1FD87F'/>
+      <StatusBar style="auto" backgroundColor=''/>
       { hasRide ? (
-        <RidePassengerExecution></RidePassengerExecution>
+        <RidePassengerExecution onRide={() => onRideRequest()}></RidePassengerExecution>
       ):(
         <Map onRide={() => onRideRequest()}></Map>
       )}
