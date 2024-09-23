@@ -65,6 +65,12 @@ export default function PaymentPilot (){
             });
             try {
                 await socket.send(message);
+                if(!invoice){
+                    await fetchInvoice()
+                }
+                if(user && invoice){
+                    user.balance += invoice.value 
+                }
                 setIsFinished(true);
             } catch (error) {
                 console.error("Error sending confirmation:", error);
