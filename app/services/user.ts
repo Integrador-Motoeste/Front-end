@@ -23,6 +23,22 @@ export type UserSignIn = {
     password: string;
 }
 
+export type TurnPilot = {
+    pilot: {
+        cpf: string;
+        cnh: string;
+    }
+    motorcycle: {
+        model: string;
+        year: number;
+        plate: string;
+        color: string;
+        brand: string;
+        onwer: number;
+        picture: string;
+    }
+}
+
 export default class UserService {
     private axiosClient = api;
     private baseUrl = "api/users/"
@@ -82,9 +98,9 @@ export default class UserService {
         }
     }
 
-    async turn_pilot(){
+    async turn_pilot(data: TurnPilot){
         try{
-            const response = await this.axiosClient.get(`${this.baseUrl}turn_user_pilot/`, {
+            const response = await this.axiosClient.get(`turn_pilot/post/`, {
                 headers: {
                     Authorization: `Bearer ${this.authToken}`,
                 }
