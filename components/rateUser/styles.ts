@@ -21,7 +21,8 @@ export const style = StyleSheet.create({
     title: {
         fontSize: 18,
         color: '#1FD87F',
-        marginBottom: 20,
+        marginBottom: 30,
+        textAlign: 'center',
     },
     userInfoContainer: {
         borderRadius: 15,
@@ -52,7 +53,7 @@ export const style = StyleSheet.create({
     },
     ratingContainer: {
         flexDirection: 'row',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     ratingButton: {
         width: 40,
