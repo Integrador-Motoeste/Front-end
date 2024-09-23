@@ -9,6 +9,7 @@ import { AuthContext } from '@/context/AuthContext';
 import { RatingService } from '@/app/services/rating';
 import ButtonOutLine from '@/components/ButtonOutLine';
 import { router } from 'expo-router';
+import { to_br_real } from '@/components/utils/to-real';
 
 export default function Profile() {
   const { user, userToken } = useContext(AuthContext);
@@ -51,7 +52,7 @@ export default function Profile() {
       <ContentProfile>
         
         {user?.groups.includes(2) &&
-          <BigTextContent label='Saldo' text={String(user?.balance)}/>
+          <BigTextContent label='Saldo' text={to_br_real(user?.balance)} />
         }
         <InfoGrid>
           <SmallTextContent label='CPF' text={user?.cpf as string} />

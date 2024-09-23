@@ -100,6 +100,9 @@ export default function PaymentPilot (){
 
     // Pega o QRCode da fatura
     async function get_qrcode(){
+        if(!invoice){
+            await fetchInvoice()
+        }
         if(invoice){
             if (invoice && invoice.status == 'completed'){
                 setIsFinished(true)
