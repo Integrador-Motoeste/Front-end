@@ -2,7 +2,7 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity, Image, Text } from "react-native";
 import { SafeAreaView, Clipboard, View } from "react-native";
-import InvoiceService, { InvoiceType, QRCodeType } from "@/app/services/invoices";
+import InvoiceService, {InvoiceType, QRCodeType } from "@/app/services/invoices";
 import { useState, useEffect } from "react";
 import { 
     Header, HeaderName, Container, QRImage, PixContainer, PixInputContainer, PixCode,
@@ -17,7 +17,8 @@ import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 import { measure } from "react-native-reanimated";
 import Button from "@/components/Button";
-
+import { RatingService } from "@/app/services/rating";
+import { RatingComponent } from "@/components/rateUser";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
@@ -37,6 +38,7 @@ export default function PaymentPilot (){
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)
     const [socket, setSocket] = useState<any>(null);
+    const [modalVisible, setModalVisible] = useState(false);
 
 
     const connectSocket = () => {
@@ -143,6 +145,35 @@ export default function PaymentPilot (){
         }
     }, [invoice])
 
+    const handleOpenModal = () => {
+        setModalVisible(true);
+      };
+    
+    const handleConfirm = async (rating: number) => {
+        if (!user || !userToken) return;
+    
+        const ratingService = new RatingService(userToken);
+        try {
+            const passangerId = invoice?.client_id;
+            if (!passangerId) {
+                console.error("ID do passageiro não encontrado");
+                return;
+            }
+    
+            await ratingService.createRating({
+                rating: rating,
+                user: passangerId,
+                owner: user.id,
+            });
+    
+            console.log('Avaliação enviada com sucesso');
+        } catch (error) {
+            console.error('Erro ao enviar avaliação:', error);
+        }
+    
+        setModalVisible(false);
+    };
+
     return (
         <SafeAreaView style={{flex: 1}}>
             <StatusBar style="auto"/>
@@ -174,6 +205,7 @@ export default function PaymentPilot (){
                                     {isFinished ?
                                     ("Confirmado! Obrigado por utilizar nossos serviços."):
                                     ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
+                                    <Button title="Avaliar Motorista" onPress={handleOpenModal} />
                                 </InstructionText>
                                 <ValueContainer>
                                     <ValueLabel>
@@ -191,6 +223,16 @@ export default function PaymentPilot (){
                         )
                     }
                 </Container>
+
+                <RatingComponent
+                    visible={modalVisible}
+                    name="Damião Teodósio"
+                    userImage="https://via.placeholder.com/40"
+                    onCancel={() => setModalVisible(false)}
+                    onConfirm={handleConfirm}
+                    message="Avalie o Motorista"
+                />
+
         </SafeAreaView>
     )
 }

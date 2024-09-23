@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Header from '@/components/header';
 import StarIcon from '@/assets/SVG/star-icon';
 import SmallTextContent from '@/components/smallTextContent';
@@ -19,6 +19,7 @@ import CheckIcon from '@/assets/SVG/check';
 import { to_br_real } from '@/components/utils/to-real';
 import { router } from 'expo-router';
 import ButtonOutLine from '@/components/ButtonOutLine';
+import { RatingService } from '@/app/services/rating';
 
 export default function Profile() {
   const { user, userToken } = useContext(AuthContext);
@@ -28,6 +29,17 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [isFailed, setIsFailed] = useState(false);
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user && userToken) {
+      const ratingService = new RatingService(userToken);
+      
+      ratingService.getAverageRating(user.id).then((data) => {
+        setAverageRating(data.average_rating);
+      });
+    }
+  }, [user, userToken]);
 
 
   const cancelWithdraw = () => {
@@ -81,6 +93,7 @@ export default function Profile() {
             </ProfileImageContainer>
             
             <ProfileInfo>
+              <Rating><StarIcon /> {averageRating ? averageRating.toFixed(2) : "0"}</Rating>
               <NameUser>{user?.first_name} {user?.last_name}</NameUser>
             </ProfileInfo>
           </ProfileSection>

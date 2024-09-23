@@ -14,7 +14,8 @@ import CopyPastIcon from "@/assets/SVG/copypaste";
 import CheckIcon from "@/assets/SVG/check";
 import Spinner from "@/components/spinnig";
 import { router, useLocalSearchParams } from "expo-router";
-
+import { RatingService } from "@/app/services/rating";
+import { RatingComponent } from "@/components/rateUser";
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { Ride } from "@/app/services/rides";
@@ -34,6 +35,7 @@ export default function PaymentPassenger(){
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isFinished, setIsFinished] = useState<boolean>(false)	
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [modalVisible, setModalVisible] = useState(false);
 
     const connectSocket = () => {
         const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
@@ -73,6 +75,7 @@ export default function PaymentPassenger(){
         const response = await invoiceService.get_invoice_by_ride_id(id)
         if(response.status === 200){
             setInvoice(response.data)
+            console.log("Invoice data: ", response.data);
             const data = response.data
             if (data.external_id == null) {
                 await invoiceService.process_payment(data.id)
@@ -85,6 +88,7 @@ export default function PaymentPassenger(){
 
     // Processa a fatura
     async function process_invoice(){
+        console.log("Processing invoice with ID:", invoice?.id);
         const response = await invoiceService.process_payment(2)
         console.log(response.data, response.status)
     }
@@ -95,6 +99,7 @@ export default function PaymentPassenger(){
             if (invoice && invoice.status == 'completed'){
                 setIsFinished(true)
             }
+            console.log("Invoice ID: ", invoice.id); // Verifique se o ID está correto
             const response = await invoiceService.get_qr_code(invoice?.id)
             setQrcode(response.data)
             setIsLoading(false)
@@ -128,6 +133,35 @@ export default function PaymentPassenger(){
         }
     }, [invoice])
 
+    const handleOpenModal = () => {
+        setModalVisible(true);
+      };
+    
+    const handleConfirm = async (rating: number) => {
+        if (!user || !userToken) return;
+    
+        const ratingService = new RatingService(userToken);
+        try {
+            const driverId = invoice?.pilot_id;
+            if (!driverId) {
+                console.error("ID do motorista não encontrado");
+                return;
+            }
+    
+            await ratingService.createRating({
+                rating: rating,
+                user: driverId,
+                owner: user.id,
+            });
+    
+            console.log('Avaliação enviada com sucesso');
+        } catch (error) {
+            console.error('Erro ao enviar avaliação:', error);
+        }
+    
+        setModalVisible(false);
+    };
+
     return (
         <SafeAreaView style={{flex: 1}}>
             <StatusBar style="auto"/>
@@ -152,6 +186,7 @@ export default function PaymentPassenger(){
                                 <CheckIcon/>
                             </View>
                             <Button title="Voltar" onPress={finish}/>
+                            <Button title="Avaliar Motorista" onPress={handleOpenModal} />
                         </>
                     ) : (
                         <>
@@ -178,6 +213,16 @@ export default function PaymentPassenger(){
                     )
                     }
                 </Container>
+
+                <RatingComponent
+                    visible={modalVisible}
+                    name="Damião Teodósio"
+                    userImage="https://via.placeholder.com/40"
+                    onCancel={() => setModalVisible(false)}
+                    onConfirm={handleConfirm}
+                    message="Avalie o Passageiro"
+                />
+
         </SafeAreaView>
     )
 }
