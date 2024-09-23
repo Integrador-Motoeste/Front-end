@@ -13,6 +13,13 @@ import { SearchingPop } from "@/components/searchingPopup";
 import { to_br_real } from "@/components/utils/to-real";
 import { PassengerNotification } from "@/components/notifications/passengerConfirm";
 import { router } from "expo-router";
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import ridesService, { RideCreate } from "@/app/services/rides";
+import InvoiceService, { InvoiceCreate } from "@/app/services/invoices";
+import GoogleMapsService from "@/app/services/google";
+
+
 const google_key = process.env.EXPO_PUBLIC_GOOGLE_API_KEY as string
 const ws_base_url = process.env.EXPO_PUBLIC_WS_BACKEND_URL as string
 
@@ -21,25 +28,31 @@ interface mapsProps {
 }
 
 export default function Map({onRide}: mapsProps) {
+    const { userToken, isLoading, user } = useContext(AuthContext);
     const [origin, setOrigin] = useState<any>(null)
     const [destination, setDestination] = useState<any>(null)
     const [isTypingOrigin, setIsTypingOrigin] = useState(false);
     const [isTypingDestination, setIsTypingDestination] = useState(false);
     const mapRef = useRef<any>(null);
+    const invoice_service = new InvoiceService(userToken as string);
 
     const [distance, setDistance] = useState<string>("");
     const [duration, setDuration] = useState<string>("");
-    const [price, setPrice] = useState<number | string>(0);
+    const [price, setPrice] = useState<number>(0);
+    const [priceText, setPriceText] = useState<string>("");
 
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [socket, setSocket] = useState<any>(null);
     const [hasPilot, setHasPilot] = useState(false);
     const [pilotId, setPilotId] = useState<any>(null);
+    const ride_service = new ridesService(userToken as string);
+    const google_service = new GoogleMapsService();
+
 
     // BEGIN QUEUE SOCKET
     const connectSocket = async () => {
         return new Promise((resolve, reject) => {
-            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/1/passenger/`);
+            const socket = new WebSocket(`${ws_base_url}/ws/rides_queue/${user?.id}/passenger/`);
     
             socket.onopen = () => {
                 setSocket(socket);
@@ -52,7 +65,7 @@ export default function Map({onRide}: mapsProps) {
                         longitude: origin.longitude
                     },
                     user_type : 'passenger',
-                    user_id: 1,
+                    user_id: user?.id,
                 });
 
                 socket.send(message)
@@ -81,7 +94,7 @@ export default function Map({onRide}: mapsProps) {
             const socket = await connectSocket() as WebSocket;
             const message = JSON.stringify({
                 type: "request_ride",
-                passenger_id: 1,
+                passenger_id: user?.id,
                 origin: origin,
                 destination: {
                     latitude: destination.lat,
@@ -90,7 +103,7 @@ export default function Map({onRide}: mapsProps) {
                 info: {
                     distance: distance,
                     duration: duration,
-                    price: price,
+                    price: priceText,
                 }
             });
             socket.send(message); 
@@ -103,7 +116,7 @@ export default function Map({onRide}: mapsProps) {
     const remove_coords = async () => {
         const message = JSON.stringify({
             type: "remove_coords",
-            user_id: 1,
+            user_id: user?.id,
             user_type: 'passenger',
         });
 
@@ -115,6 +128,9 @@ export default function Map({onRide}: mapsProps) {
             remove_coords();
             socket.close();
             setIsConfirmed(false);
+            setPilotId(null);
+            setHasPilot(false);
+            setIsConfirmed(false);
         }
     };
 
@@ -122,11 +138,12 @@ export default function Map({onRide}: mapsProps) {
         if (socket) {
             const message = JSON.stringify({
                 type: "confirm_pilot",
-                pilot_id: 10,
+                pilot_id: pilotId,
                 ride_id: null,
                 response: false
             });
             socket.send(message);
+            setPilotId(null);
             setHasPilot(false);
         }
     }
@@ -134,16 +151,71 @@ export default function Map({onRide}: mapsProps) {
     const acceptPilot = async () => {
         if (socket) {
 
-            /// WILL CALL CREATE RIDE HERE THEN SEND TO PILOT
-            const message = JSON.stringify({
-                type: "confirm_pilot",
-                ride_id: 5,
-                pilot_id: pilotId,
-                response: true
-            });
-            await socket.send(message);
-            setHasPilot(false);
-            onRide();
+            const originText = await google_service.getPlaceFromCoordinates(origin.latitude, origin.longitude);
+            const destinationText = await google_service.getPlaceFromCoordinates(destination.lat, destination.lng);
+
+            const newRide: RideCreate = {
+                distance: parseFloat(distance.replace(" km", "").replace(",", ".")), 
+                duration: duration as string,
+                pilot: pilotId,
+                passenger: user?.id as number,
+                start_lat: origin.latitude,
+                start_lng: origin.longitude,
+                end_lat: destination.lat,
+                end_lng: destination.lng,
+                origin: originText,
+                destination: destinationText,
+                status: "started",
+            };
+
+            const response = await ride_service.createRide(newRide);
+
+            if (response.status === 201) {
+                
+                const invoice: InvoiceCreate = {
+                    payment_type: "PIX",
+                    status: "pending",
+                    value: price,
+                    user: user?.id as number,
+                    pilot: pilotId,
+                    ride: response.data.id,
+                };
+                const invoiceResponse = await invoice_service.createInvoice(invoice);
+
+                if (invoiceResponse.status === 201) {
+                        const message = JSON.stringify({
+                            type: "confirm_pilot",
+                            ride_id: response.data.id,
+                            pilot_id: pilotId,
+                            response: true
+                        });
+                        await socket.send(message);
+                        setHasPilot(false);
+                        socket.close();
+                        onRide();                    
+                }else{
+                    const message = JSON.stringify({
+                        type: "confirm_pilot",
+                        ride_id: response.data.id,
+                        pilot_id: pilotId,
+                        response: false,
+                        cancel_type: "invoice"
+                    });
+                    await socket.send(message);
+                    Alert.alert("Erro", "Não foi possível confirmar a corrida. Tente novamente.");
+                    cancelRide();
+                }
+            }else{
+                const message = JSON.stringify({
+                    type: "confirm_pilot",
+                    ride_id: 0,
+                    pilot_id: pilotId,
+                    response: false
+                });
+                await socket.send(message);
+                Alert.alert("Erro", "Não foi possível confirmar a corrida. Tente novamente.");
+                cancelRide();
+            }
         }
     }
     //// END QUEUE SOCKET
@@ -182,9 +254,11 @@ export default function Map({onRide}: mapsProps) {
     useEffect(() => {
         if (origin && destination) {
             setTimeout(() => {
-                mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                });
+                if(mapRef.current){
+                    mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
+                        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    });
+                }
             }, 0);
         }
     }, [origin, destination]);
@@ -206,8 +280,9 @@ export default function Map({onRide}: mapsProps) {
                         .replace(" minuto", "min");
                         setDuration(duration);
 
-                        const price = (data.rows[0].elements[0].distance.value * 0.00175).toFixed(2);
-                        setPrice(to_br_real(price));
+                        const raw_price = (data.rows[0].elements[0].distance.value * 0.00210 + 1.99).toFixed(2);
+                        setPrice(parseFloat(raw_price))
+                        setPriceText(to_br_real(raw_price));
                     } else {
                         console.error("Error fetching distance data");
                     }
@@ -295,7 +370,7 @@ export default function Map({onRide}: mapsProps) {
 
     
         { hasPilot ?
-            <PassengerNotification accept={acceptPilot} decline={declinePilot}/>
+            <PassengerNotification pilotId={pilotId} token={userToken as string} accept={acceptPilot} decline={declinePilot}/>
         : isConfirmed ? (
             <SearchingPop visible={isConfirmed} onCancel={() => cancelRide()} message="Procurando pilotos disponíveis..."/>
         ) :
@@ -318,7 +393,7 @@ export default function Map({onRide}: mapsProps) {
                             }}>
                                 <Badge value={distance}></Badge>
                                 <Badge value={duration}></Badge>
-                                <Badge color={"#34C17D"} value={price}></Badge>
+                                <Badge color={"#34C17D"} value={priceText}></Badge>
                             </View>
                             <Button style={{width: "80%"}} title="Confirmar" onPress={requestRide}/>
                         </View>

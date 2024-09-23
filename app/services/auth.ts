@@ -12,6 +12,8 @@ export type UserCreate = {
     password2: string;
     first_name: string;
     last_name: string;
+    cpf: string;
+    picture: any;
 }
 
 export default class AuthService {
@@ -51,11 +53,38 @@ export default class AuthService {
   
     async signUpUser(data: UserCreate) {
       const url = `${this.baseUrl}registration/`;
+      const formData = new FormData();
+      formData.append("email", data.email);
+      formData.append("password1", data.password1);
+      formData.append("password2", data.password2);
+      formData.append("first_name", data.first_name);
+      formData.append("last_name", data.last_name);
+      formData.append("cpf", data.cpf);
+      formData.append("picture", {
+        uri: data.picture,
+        type: "image/jpeg",
+        name: "profile.jpg",
+      });
+  
       try {
-        const response = await this.axiosClient.post(url, data);
+        const response = await this.axiosClient.post(url, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          // transformRequest: (data, headers) => {
+          //   delete headers.common["Content-Type"];
+          //   return data;
+          // },
+        });
         return response;
       } catch (error: any) {
-        console.error("Error creating user:", error.message);
+        if (error.response) {
+          console.error("Error creating user:", error.response.data);
+        } else if (error.request) {
+          console.error("Error creating user: No response received", error.request);
+        } else {
+          console.error("Error creating user:", error.message);
+        }
         return error.response;
       }
     }
@@ -63,7 +92,7 @@ export default class AuthService {
     async logout() {
       const url = `${this.baseUrl}logout/`;
       try {
-        const response = await this.axiosClient.post(url, {}, {
+        const response = await this.axiosClient.post(url, {
           headers: {
             Authorization: `Bearer ${this.authToken}`,
           },
@@ -75,6 +104,7 @@ export default class AuthService {
         return error.response;
       }
     }
+
     
 }
 

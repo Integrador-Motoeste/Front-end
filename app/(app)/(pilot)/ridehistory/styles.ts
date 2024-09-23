@@ -16,15 +16,16 @@ export const style = StyleSheet.create({
     },
 
     title: {
+        //marginTop: 25,
         fontSize: 32,
         color: 'white',
-        fontWeight: 'bold',
     },
 
     filters: {
         flexDirection: 'row',
         marginTop: 10,
         marginRight: 50,
+        gap: 8,
     },
 
     filter: {
@@ -50,5 +51,33 @@ export const style = StyleSheet.create({
     content: {
         padding: 20,
       },
+
+    noRidesText: {    
+    fontSize: 18,   
+    color: 'gray',        
+    marginTop: 20,
+    },
+
+    filterButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 5,
+        marginLeft: 20,
+    },
+
+    filterButton: {
+        padding: 10,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        marginRight: 5,
+    },
+
+    activeFilter: {
+        padding: 10,
+        backgroundColor: '#1FD87F',
+        color: '#fff',
+        borderRadius: 20,
+        marginRight: 5,
+    },
 
 })

@@ -16,56 +16,78 @@ import { ModalContainer, ModalContent } from "./styles";
 import { truncateName } from "@/components/utils/truncate-text";
 import CalendarIcon from "@/assets/SVG/calendar";
 import PlateIcon from "@/assets/SVG/plate";
-
+import { useState } from "react";
+import UserService from "@/app/services/user";
 interface pilotProps {
     accept: () => void;
     decline: () => void;
+    pilotId: number;
+    token: string;
 }
 
-export function PassengerNotification({accept, decline}: pilotProps) {
+const base_url = process.env.EXPO_PUBLIC_BACKEND_URL as string
+
+
+export function PassengerNotification(props : pilotProps) {
+    const [pilot, setPilot] = useState<any>(null);
+    const user_service = new UserService(props.token);
+
+    const fetchPilot = async () => {
+        const response = await user_service.get_pilot(props.pilotId);
+        if (response && response.status === 200){
+            setPilot(response.data);
+        }
+    } 
+
+    useEffect(() => {
+        fetchPilot();
+    }, [])
+
     return (
         <Modal
             visible={true}
             transparent={true}
             animationType="slide"
-            onRequestClose={decline}
+            onRequestClose={props.decline}
         >
             <ModalContainer>
                 <ModalContent>
                 <Icon>
                     <MotoIcon width={86} height={86}/>
                 </Icon>
-                    <ProfileMainContainer>
-                        <ProfileContainer>
-                            <StarContainer>
-                                <StarImg source={require('../../../assets/images/notification/star.png')}/>
-                                <StarNumber>4.5</StarNumber>
-                            </StarContainer>
-                            <ProfileInfoContainer>
-                                <ProfileImg source={require('../../../assets/images/notification/profile.png')}/>
-                                <ProfileName>{truncateName('Joao pedro', 20)}</ProfileName>
-                            </ProfileInfoContainer>
-                        </ProfileContainer>
-                    </ProfileMainContainer>
-                    <VehicleContainer>
-                        <BadgeContainer>
-                            <VehicleLeftInfoContainer>
-                                <PlateIcon/>
-                                <VehicleInfoText>ABCD1234</VehicleInfoText>
-                            </VehicleLeftInfoContainer>
-                            <VehicleRightInfoContainer>
-                                <CalendarIcon/>
-                                <VehicleInfoText>2012</VehicleInfoText>
-                            </VehicleRightInfoContainer>
-                        </BadgeContainer>
-                        <VehicleImageContainer>
-                            <MotoIcon width={50} height={50}/>
-                            <VehicleMainInfoContainer>
-                                <VehicleName>{truncateName('Honda Biz 125', 20)}</VehicleName>
-                                <VehicleColor>Cor Amarela</VehicleColor>
-                            </VehicleMainInfoContainer>
-                        </VehicleImageContainer>
-                    </VehicleContainer>
+                    {pilot && (
+                        <>
+                        
+                            <ProfileMainContainer>
+                                <ProfileContainer>
+                                    <ProfileInfoContainer>
+                                        <ProfileImg source={{uri: pilot.user.picture}}/>
+                                        <ProfileName>{truncateName(pilot.user.first_name, 20)}</ProfileName>
+                                    </ProfileInfoContainer>
+                                </ProfileContainer>
+                            </ProfileMainContainer>
+                            <VehicleContainer>
+                                <BadgeContainer>
+                                    <VehicleLeftInfoContainer>
+                                        <PlateIcon/>
+                                        <VehicleInfoText>{pilot.motorcycle.plate}</VehicleInfoText>
+                                    </VehicleLeftInfoContainer>
+                                    <VehicleRightInfoContainer>
+                                        <CalendarIcon/>
+                                        <VehicleInfoText>{pilot.motorcycle.year}</VehicleInfoText>
+                                    </VehicleRightInfoContainer>
+                                </BadgeContainer>
+                                <VehicleImageContainer>
+                                    <ProfileImg source={{uri: `${base_url}${pilot.motorcycle.picture_moto}`}}/>
+                                    <VehicleMainInfoContainer>
+                                        <VehicleName>{truncateName(`${pilot.motorcycle.brand} ${pilot.motorcycle.model}`, 20)}</VehicleName>
+                                        <VehicleColor>{pilot.motorcycle.color}</VehicleColor>
+                                    </VehicleMainInfoContainer>
+                                </VehicleImageContainer>
+                            </VehicleContainer>
+                        </>
+                    )}
+
                     <ButtonContainer>
                         <Button 
                             margin="0px"
@@ -73,14 +95,14 @@ export function PassengerNotification({accept, decline}: pilotProps) {
                             buttonColor="#D81F1F" 
                             buttonWidth="40%" 
                             title="Recusar"
-                            onPress={decline}
+                            onPress={props.decline}
                         />
                         <Button
                             margin="0px"     
                             buttonHeight="32px" 
                             buttonWidth="40%" 
                             title="Aceitar"
-                            onPress={accept}
+                            onPress={props.accept}
                         />
                     </ButtonContainer>
                 </ModalContent>

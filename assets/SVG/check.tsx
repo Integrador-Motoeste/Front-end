@@ -1,8 +1,13 @@
 import React from 'react';
 import Svg, { Path } from 'react-native-svg';
 
-const CheckIcon = (props: any) => (
-  <Svg width="118" height="117" viewBox="0 0 118 117" fill="none" xmlns="http://www.w3.org/2000/svg">
+type props = {
+  width?: number | string;
+  height?: number | string;
+}
+
+const CheckIcon = (props: props) => (
+  <Svg width={props.width ? props.width : "118"} height={props.height ? props.height : "118"} viewBox="0 0 118 117" fill="none" xmlns="http://www.w3.org/2000/svg">
     <Path 
       fillRule="evenodd" 
       clipRule="evenodd" 

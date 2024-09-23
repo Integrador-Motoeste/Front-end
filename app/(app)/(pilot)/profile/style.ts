@@ -1,5 +1,6 @@
 import styled from "styled-components/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import  Styled  from "styled-components/native";
 
 export const ContentProfile = styled.View`
   flex: 1;
@@ -19,6 +20,7 @@ export const TitleContext = styled.View`
   display: flex;
   align-items: baseline;
   flex-direction: row;
+  align-items: center;
 `;
 
 export const Title = styled.Text`
@@ -83,12 +85,70 @@ export const InfoGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 5px;
-  margin-top: 15px;
+  gap: 10px;
 `;
 
 export const VehicleCard = styled.View`
   flex-direction: row;
   align-items: center;
   width: 100%;
+`;
+
+
+export const ButtonContainer = styled.View`
+  flex-direction: row;
+  width: 50%;
+  margin-top: 10px;
+  justify-content: flex-end;
+  gap: 6px;
+`;
+
+export const WithdrawModalContainer = styled.View`
+    flex: 1;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+`;
+
+export const WithdrawContentContainer = Styled.View`
+    width: 75%;
+    margin: 24px;
+    height: 300px;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+
+    elevation: 20;
+    border-radius: 15px;
+`;
+
+
+export const CurrencyInputContainer = styled.View`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  height: 50px;
+`;
+
+
+export const InstructionText = Styled.Text`
+    text-align: center;
+    font-size: 16px;
+    color: #7D7D7D;
+    font-family: 'Inter_600SemiBold';
+    width: 80%;
+`;
+
+
+export const WithdrawButtons = Styled.View`
+    display: flex;
+    justifyContent: space-around;
+    flexDirection: row;
+    width: 100%;
+    margin: 8px;
 `;

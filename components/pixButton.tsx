@@ -1,16 +1,20 @@
-import { AuthContext } from '@/context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useContext } from 'react';
 import Styled from 'styled-components/native';
+import { useNavigation } from '@react-navigation/native';
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import PixIcon from '@/assets/SVG/pixIcon';
 
+type props = {
+    onPress: () => void;
+}
 
-export default function ExitButton() {
-    const { logout } = useContext(AuthContext); 
+export default function PixButton(props: props) {
 
     return (
-        <Button onPress={() => {logout()}}>
-            <Ionicons name="exit-outline" size={22} color="#c41b1b" />
-            <Text>Sair</Text>
+        <Button onPress={() => {props.onPress()}}>
+            <PixIcon width={22} height={22}/>
+            <Text>Sacar</Text>
         </Button>
     );
 }
@@ -27,7 +31,7 @@ const Button = Styled.TouchableOpacity`
 `;
 
 const Text = Styled.Text`
-    color: #c41b1b;
+    color: #00BFA5;
     font-size: 15px;
     font-family: "Inter_600SemiBold";
     margin-left: 2px;

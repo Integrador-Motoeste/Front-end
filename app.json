@@ -31,16 +31,14 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "node_modules/@expo-google-fonts/inter/Inter_600SemiBold.ttf",
-            "node_modules/@expo-google-fonts/inter/Inter_400Regular.ttf",
-            "node_modules/@expo-google-fonts/inter/Inter_500Medium.ttf"
-          ]
+          "custom": {
+            "Inter_400Regular": "./assets/fonts/Inter-Regular.ttf",
+            "Inter_500Medium": "./assets/fonts/Inter-Medium.ttf",
+            "Inter_600SemiBold": "./assets/fonts/Inter-SemiBold.ttf",
+            "Inter_700Bold": "./assets/fonts/Inter-Bold.ttf"
+          }
         }
       ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }
