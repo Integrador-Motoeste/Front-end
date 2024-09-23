@@ -5,14 +5,14 @@ import Button from '@/components/Button';
 
 interface RatingComponentProps  {
     visible: boolean;
-    name: string;
-    userImage: string;
+    // name: string;
+    // userImage: string;
     onCancel: () => void;
     onConfirm: (rating: number) => void;
     message: string;
 }
 
-export const RatingComponent: React.FC<RatingComponentProps> = ({ name, userImage, onCancel, onConfirm, message, visible }: RatingComponentProps) => {
+export const RatingComponent: React.FC<RatingComponentProps> = ({ onCancel, onConfirm, message, visible }: RatingComponentProps) => {
     const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
     const handleRatingSelect = (rating: number) => {
@@ -30,12 +30,12 @@ export const RatingComponent: React.FC<RatingComponentProps> = ({ name, userImag
                 <View style={style.modalContainer}>
                     <Text style={[style.title]}>{message}</Text>
 
-                    <View style={style.userInfoContainer}>
+                    {/* <View style={style.userInfoContainer}>
                         <View style={[style.userInfo]}>
                             <Image source={{ uri: userImage }} style={style.userImage} />
                             <Text style={style.userName}>{name}</Text>
                         </View>
-                    </View>
+                    </View> */}
 
                     <View style={[style.ratingContainer]}>
                         {[1, 2, 3, 4, 5].map((rating) => (

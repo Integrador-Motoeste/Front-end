@@ -228,8 +228,8 @@ export default function PaymentPilot (){
 
                 <RatingComponent
                     visible={modalVisible}
-                    name="Damião Teodósio"
-                    userImage="https://via.placeholder.com/40"
+                    // name="Damião Teodósio"
+                    // userImage="https://via.placeholder.com/40"
                     onCancel={() => setModalVisible(false)}
                     onConfirm={handleConfirm}
                     message="Avalie o Passageiro"

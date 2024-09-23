@@ -21,6 +21,7 @@ export const style = StyleSheet.create({
     title: {
         fontSize: 18,
         color: '#1FD87F',
+        marginBottom: 20,
     },
     userInfoContainer: {
         borderRadius: 15,
