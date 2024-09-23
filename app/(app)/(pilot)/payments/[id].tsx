@@ -39,6 +39,7 @@ export default function PaymentPilot (){
     const [isFinished, setIsFinished] = useState<boolean>(false)
     const [socket, setSocket] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [averageRating, setAverageRating] = useState<number | null>(null);
 
 
     const connectSocket = () => {
@@ -149,24 +150,25 @@ export default function PaymentPilot (){
         setModalVisible(true);
       };
     
-    const handleConfirm = async (rating: number) => {
+      const handleConfirm = async (rating: number) => {
         if (!user || !userToken) return;
     
         const ratingService = new RatingService(userToken);
         try {
-            const passangerId = invoice?.client_id;
-            if (!passangerId) {
-                console.error("ID do passageiro não encontrado");
+            const passaegerId = invoice?.client_id;
+            if (!passaegerId) {
+                console.error("ID do motorista não encontrado");
                 return;
             }
     
             await ratingService.createRating({
                 rating: rating,
-                user: passangerId,
+                user: passaegerId,
                 owner: user.id,
             });
     
             console.log('Avaliação enviada com sucesso');
+            finish();
         } catch (error) {
             console.error('Erro ao enviar avaliação:', error);
         }
@@ -198,6 +200,7 @@ export default function PaymentPilot (){
                                     <CheckIcon/>
                                 </View>
                                 <Button title="Voltar" onPress={finish}/>
+                                <Button title="Avaliar Motorista" onPress={handleOpenModal} />
                             </>
                         ) : (
                             <>
@@ -205,7 +208,6 @@ export default function PaymentPilot (){
                                     {isFinished ?
                                     ("Confirmado! Obrigado por utilizar nossos serviços."):
                                     ("Sua corrida foi finalizada! É possível o cliente realizar o pagamento com o código QR abaixo.")}
-                                    <Button title="Avaliar Motorista" onPress={handleOpenModal} />
                                 </InstructionText>
                                 <ValueContainer>
                                     <ValueLabel>
@@ -230,7 +232,7 @@ export default function PaymentPilot (){
                     userImage="https://via.placeholder.com/40"
                     onCancel={() => setModalVisible(false)}
                     onConfirm={handleConfirm}
-                    message="Avalie o Motorista"
+                    message="Avalie o Passageiro"
                 />
 
         </SafeAreaView>

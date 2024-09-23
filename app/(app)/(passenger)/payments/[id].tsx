@@ -36,6 +36,7 @@ export default function PaymentPassenger(){
     const [isFinished, setIsFinished] = useState<boolean>(false)	
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [averageRating, setAverageRating] = useState<number | null>(null);
 
     const connectSocket = () => {
         const socket = new WebSocket(`${ws_base_url}/ws/payments/${id}/`)
@@ -137,7 +138,7 @@ export default function PaymentPassenger(){
         setModalVisible(true);
       };
     
-    const handleConfirm = async (rating: number) => {
+      const handleConfirm = async (rating: number) => {
         if (!user || !userToken) return;
     
         const ratingService = new RatingService(userToken);
@@ -155,6 +156,7 @@ export default function PaymentPassenger(){
             });
     
             console.log('Avaliação enviada com sucesso');
+            finish();
         } catch (error) {
             console.error('Erro ao enviar avaliação:', error);
         }
@@ -220,7 +222,7 @@ export default function PaymentPassenger(){
                     userImage="https://via.placeholder.com/40"
                     onCancel={() => setModalVisible(false)}
                     onConfirm={handleConfirm}
-                    message="Avalie o Passageiro"
+                    message="Avalie o Motorista"
                 />
 
         </SafeAreaView>
